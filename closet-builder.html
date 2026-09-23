@@ -17,7 +17,7 @@
 .toast{position:absolute;right:12px;bottom:65px;max-width:380px;padding:10px 12px;border-radius:8px;background:#172028;color:#fff;box-shadow:var(--shadow);font-size:10px;opacity:0;transform:translateY(6px);pointer-events:none;transition:.18s;z-index:10}.toast.show{opacity:1;transform:none}.modal-back{position:fixed;inset:0;background:#0b162277;z-index:100;display:grid;place-items:center}.modal{width:min(620px,calc(100vw - 30px));max-height:calc(100vh - 30px);overflow:auto;background:#fff;border-radius:12px;box-shadow:0 30px 90px #0006;padding:18px}.modal h2{margin:0 0 12px}.catalog{display:grid;grid-template-columns:repeat(2,1fr);gap:8px}.catalog button{border:1px solid var(--line);background:#fff;border-radius:8px;padding:10px;text-align:left}.catalog button:hover{border-color:#8ab3df;background:#f4f9ff}.modal-actions{display:flex;justify-content:flex-end;gap:7px;margin-top:14px}
 @media(max-width:960px){.workspace{grid-template-columns:220px minmax(0,1fr)}.right{position:absolute;right:0;top:116px;bottom:0;width:310px;z-index:20;box-shadow:-10px 0 30px #1225}.brand{min-width:190px}.tool{width:55px}}
 .cube-face.active{filter:brightness(.92);stroke:var(--blue);stroke-width:2}
-.run.section-dragging{opacity:.55}.run.drop-target{stroke:#0d5cb8!important;stroke-width:3!important;stroke-dasharray:3 2}
+.run.section-dragging{opacity:.55}.run.drop-target{stroke:#0d5cb8!important;stroke-width:3!important;stroke-dasharray:3 2}.toolbar{justify-content:flex-start}.filler{fill:#b89568;stroke:#755638;stroke-width:.8;vector-effect:non-scaling-stroke}.section-bubble{fill:#1473e6;stroke:#fff;stroke-width:.8;vector-effect:non-scaling-stroke}.section-bubble-text{fill:#fff;font-size:3.2px;font-weight:900;paint-order:stroke;stroke:#0d5cb8;stroke-width:.45px;pointer-events:none}
 </style>
 </head>
 <body>
@@ -220,6 +220,7 @@ function zoomByGesture(deltaY){state.zoom=Math.max(.45,Math.min(2.5,state.zoom*M
 function setCubeView(view){if(view==='top')state.view='plan';else if(view==='front')state.view='elevation';else{state.view='3d';if(view==='side')state.camera={yaw:-Math.PI/2,pitch:.08};else state.camera={yaw:-.72,pitch:.55}}render()}
 function planPoint(w,along,depth=0){return{x:w.a.x+w.ux*along+w.nx*depth,y:w.a.y+w.uy*along+w.ny*depth}}
 function isRunSelected(r){return isSelected('run',r.id)}function isSectionSelected(s){return isSelected('section',s.id)}function rodFrontPosition(depth){return Math.min(Math.max(0,n(depth)-.5),ROD_FRONT_OFFSET)}
+function renderPlanOverlays(c){for(const r of state.doc.runs){const w=wall(r.wallId);if(!w)continue;const start=r.offset,startFiller=n(r.fillerStart),endFiller=n(r.fillerEnd),fillAttrs={'data-filler':r.id};if(startFiller>0){const a=planPoint(w,start),b=planPoint(w,start+startFiller),d=planPoint(w,start+startFiller,r.depth),e=planPoint(w,start,r.depth);c.append(svg('polygon',{points:[a,b,d,e].map(p=>`${p.x},${p.y}`).join(' '),class:'filler',...fillAttrs}))}let x=start+startFiller+r.thickness;r.sections.forEach((s,i)=>{const p=planPoint(w,x+s.width/2,sectionDepth(r,s)+4);c.append(svg('circle',{cx:p.x,cy:p.y,r:2.8,class:'section-bubble','data-section':s.id,'data-run':r.id}));c.append(svg('text',{x:p.x,y:p.y+1.1,'text-anchor':'middle',class:'section-bubble-text','data-section':s.id},String(i+1)));x+=s.width+r.thickness});if(endFiller>0){const a=planPoint(w,x),b=planPoint(w,x+endFiller),d=planPoint(w,x+endFiller,r.depth),e=planPoint(w,x,r.depth);c.append(svg('polygon',{points:[a,b,d,e].map(p=>`${p.x},${p.y}`).join(' '),class:'filler',...fillAttrs}))}}}
 function renderPlan(){const c=$('canvas'),b=bounds(),z=state.zoom;c.setAttribute('viewBox',`${b.x+state.pan.x} ${b.y+state.pan.y} ${b.w/z} ${b.h/z}`);for(const room of state.rooms){if(room.closed)c.append(svg('polygon',{points:room.points.map(p=>`${p.x},${p.y}`).join(' '),class:'room-fill'}));for(const w of room.walls){const active=isSelected('wall',w.id);c.append(svg('line',{x1:w.a.x,y1:w.a.y,x2:w.b.x,y2:w.b.y,class:`wall${active?' active':''}`,'data-wall':w.id}));c.append(svg('line',{x1:w.a.x,y1:w.a.y,x2:w.b.x,y2:w.b.y,class:'hover-hit','data-wall':w.id}));const mid=planPoint(w,w.length/2,-4),label=svg('text',{x:mid.x,y:mid.y,class:'wall-label','text-anchor':'middle'},`${w.name} · ${fmt(w.length)}″`);c.append(label);for(const item of w.items){const p0=planPoint(w,item.start),p1=planPoint(w,item.start+item.width);if(blocked(item))c.append(svg('line',{x1:p0.x,y1:p0.y,x2:p1.x,y2:p1.y,class:'opening'}));else{const p=planPoint(w,item.start+item.width/2,2);c.append(svg('circle',{cx:p.x,cy:p.y,r:1.5,class:'utility'}))}}}}
   for(const r of state.doc.runs){const w=wall(r.wallId);if(!w)continue;const active=isRunSelected(r),issues=validateRun(r);let x=r.offset+r.fillerStart+r.thickness;r.sections.forEach((s,i)=>{const depth=sectionDepth(r,s),p0=planPoint(w,x,0),p1=planPoint(w,x+s.width,0),p2=planPoint(w,x+s.width,depth),p3=planPoint(w,x,depth);c.append(svg('polygon',{points:[p0,p1,p2,p3].map(p=>`${p.x},${p.y}`).join(' '),class:`run${active||isSectionSelected(s)?' active':''}${issues.length?' invalid':''}`,'data-run':r.id,'data-section':s.id}));const mid=planPoint(w,x+s.width/2,depth/2);c.append(svg('text',{x:mid.x,y:mid.y,class:'dim','text-anchor':'middle','data-section':s.id},`${i+1} · ${fmt(s.width)}″ × ${fmt(depth)}″`));x+=s.width+r.thickness});partitionPositions(r).forEach((px,i)=>{const depth=r.partitions[i]?.depth||r.depth,p=planPoint(w,px,depth),q=planPoint(w,px+r.thickness,depth);c.append(svg('polygon',{points:[planPoint(w,px,0),planPoint(w,px+r.thickness,0),q,p].map(v=>`${v.x},${v.y}`).join(' '),class:'partition','data-run':r.id}))})}}
 function renderElevation(){
@@ -229,6 +230,7 @@ function renderElevation(){
   const scale=Math.min(8,820/runWidth(r),560/r.height),ox=(1000-runWidth(r)*scale)/2,base=625,activeId=state.selected.kind==='section'?state.selected.id:null;
   let x=ox+r.fillerStart*scale;
   const drawRect=(x,y,w,h,cls,attrs={})=>c.append(svg('rect',{x,y,width:w,height:h,class:cls,...attrs}));
+  if(r.fillerStart>0)drawRect(ox,base-r.height*scale,r.fillerStart*scale,r.height*scale,'filler',{'data-filler':`${r.id}:start`});
   drawRect(x,base-r.height*scale,r.thickness*scale,r.height*scale,'partition');x+=r.thickness*scale;
   r.sections.forEach((s,si)=>{
     const sx=x,sw=s.width*scale;
@@ -260,8 +262,11 @@ function renderElevation(){
       }else drawRect(fx,y,fw,dg.height*scale,'face',{'data-door':s.door.id,'data-section':s.id});
     }
     c.append(svg('text',{x:sx+sw/2,y:base+22,class:'dim','text-anchor':'middle'},`${si+1} · ${fmt(s.width)}″`));
+    drawRect(sx+sw/2-10,base-r.height*scale-25,20,14,'section-bubble',{'data-section':s.id});
+    c.append(svg('text',{x:sx+sw/2,y:base-r.height*scale-15,'text-anchor':'middle',class:'section-bubble-text','data-section':s.id},String(si+1)));
     x+=sw;drawRect(x,base-r.height*scale,r.thickness*scale,r.height*scale,'partition');x+=r.thickness*scale;
   });
+  if(r.fillerEnd>0)drawRect(x,base-r.height*scale,r.fillerEnd*scale,r.height*scale,'filler',{'data-filler':`${r.id}:end`});
   c.append(svg('text',{x:500,y:40,'text-anchor':'middle',class:'dim'},`${wall(r.wallId)?.name||'Wall'} · ${fmt(runWidth(r))}″ outside · ${fmt(r.height)}″ high`));
 }
 function iso(p){const yaw=state.camera.yaw,pitch=state.camera.pitch,cy=Math.cos(yaw),sy=Math.sin(yaw),cp=Math.cos(pitch),sp=Math.sin(pitch),x=p.x*cy-p.y*sy,y=p.x*sy+p.y*cy,z=p.z,screenY=y*sp+z*cp;return{x:500+x*4.2*state.zoom,y:480-screenY*4.2*state.zoom}}
@@ -269,10 +274,12 @@ function face3(c,pts,fill,stroke='#53616b',attrs={}){const ps=pts.map(iso);c.app
 function box3(c,x,y,z,w,d,h,fill,attrs={}){const p=(X,Y,Z)=>({x:X,y:Y,z:Z});face3(c,[p(x,y,z+h),p(x+w,y,z+h),p(x+w,y+d,z+h),p(x,y+d,z+h)],'#eee8df','#697781',attrs);face3(c,[p(x,y,z),p(x+w,y,z),p(x+w,y,z+h),p(x,y,z+h)],fill,'#697781',attrs);face3(c,[p(x+w,y,z),p(x+w,y+d,z),p(x+w,y+d,z+h),p(x+w,y,z+h)],'#c5b49c','#697781',attrs)}
 function drawerBox3(c,x,y,z,box,attrs={}){for(const part of drawerBoxParts(box))box3(c,x+part.x,y+part.y,z+part.z,part.w,part.d,part.h,'#c3ab8e',attrs)}
 function outlineBox3(c,x,y,z,w,d,h){const pts=[[x,y,z],[x+w,y,z],[x+w,y+d,z],[x,y+d,z],[x,y,z+h],[x+w,y,z+h],[x+w,y+d,z+h],[x,y+d,z+h]].map(([X,Y,Z])=>iso({x:X,y:Y,z:Z})),edges=[[0,1],[1,2],[2,3],[3,0],[4,5],[5,6],[6,7],[7,4],[0,4],[1,5],[2,6],[3,7]];for(const[a,b]of edges)c.append(svg('line',{x1:pts[a].x,y1:pts[a].y,x2:pts[b].x,y2:pts[b].y,class:'section-outline'}))}
+function sectionBubble3(c,x,y,z,label,attrs={}){const p=iso({x,y,z});c.append(svg('rect',{x:p.x-7,y:p.y-5,width:14,height:9,rx:4.5,class:'section-bubble',...attrs}));c.append(svg('text',{x:p.x,y:p.y+1.3,'text-anchor':'middle',class:'section-bubble-text',...attrs},String(label)))}
 function render3D(){
   const c=$('canvas');c.setAttribute('viewBox',`${state.pan.x} ${state.pan.y} 1000 700`);let origin=0;
   for(const r of state.doc.runs){
-    const active=isRunSelected(r);let x=origin+r.fillerStart;
+    const active=isRunSelected(r),startFiller=n(r.fillerStart),endFiller=n(r.fillerEnd);let x=origin+startFiller;
+    if(startFiller>0)box3(c,origin,0,0,startFiller,r.depth,r.height,'#b89568',{'data-filler':`${r.id}:start`});
     box3(c,x,0,0,r.thickness,r.partitions[0]?.depth||r.depth,r.height,active?'#cfe4f8':'#bca88d',{'data-run':r.id});x+=r.thickness;
     for(let si=0;si<r.sections.length;si++){
       const s=r.sections[si],depth=sectionDepth(r,s);
@@ -311,12 +318,14 @@ function render3D(){
       }
       if(s.endPanelRight)box3(c,x+s.width,0,0,DEFAULTS.shelf,depth+DEFAULTS.endProjection,r.height,'#d5c0a4',{'data-section':s.id});
       if(isSectionSelected(s))outlineBox3(c,x,0,0,s.width,depth,r.height);
+      sectionBubble3(c,x+s.width/2,0,r.height+5,si+1,{'data-section':s.id,'data-run':r.id});
       x+=s.width;box3(c,x,0,0,r.thickness,r.partitions[si+1]?.depth||depth,r.height,active?'#cfe4f8':'#bca88d',{'data-run':r.id});x+=r.thickness;
     }
+    if(endFiller>0)box3(c,x,0,0,endFiller,r.depth,r.height,'#b89568',{'data-filler':`${r.id}:end`});
     origin+=runWidth(r)+12;
   }
 }
-function renderCanvas(){const c=$('canvas');c.innerHTML='';if(!state.doc){c.setAttribute('viewBox','0 0 1000 700');c.append(svg('text',{x:500,y:350,'text-anchor':'middle',fill:'#73808a'},'Choose a closet with a saved Room Layout.'));return}if(state.view==='plan')renderPlan();else if(state.view==='elevation')renderElevation();else render3D();$('zoomLabel').textContent=`${Math.round(state.zoom*100)}%`}
+function renderCanvas(){const c=$('canvas');c.innerHTML='';if(!state.doc){c.setAttribute('viewBox','0 0 1000 700');c.append(svg('text',{x:500,y:350,'text-anchor':'middle',fill:'#73808a'},'Choose a closet with a saved Room Layout.'));return}if(state.view==='plan'){renderPlan();renderPlanOverlays(c)}else if(state.view==='elevation')renderElevation();else render3D();$('zoomLabel').textContent=`${Math.round(state.zoom*100)}%`}
 function treeButton(label,sub,active,kind,id,indent=false){return`<button class="${active?'active':''}${indent?' indent':''}" data-kind="${kind}" data-id="${id}"><strong>${esc(label)}</strong><small>${esc(sub)}</small></button>`}
 function sectionTreeChildren(r,s){let out='';if(s.door){const dg=doorGeometry(r,s,s.door);out+=treeButton('Door',`${s.door.type} · ${dg.coverage}`,state.selected.kind==='door'&&state.selected.id===s.door.id,'door',s.door.id,true)}const drawers=s.components.filter(c=>c.type==='drawer');drawers.forEach((c,i)=>{const box=drawerBox(r,s,c);out+=treeButton(`Drawer ${i+1}`,`${fmt(box.width)}″ × ${fmt(box.depth)}″`,state.selected.kind==='component'&&state.selected.id===c.id,'component',c.id,true)});s.accessories.forEach(a=>{const tf=accessoryTransform(r,s,a);out+=treeButton(a.type,`${fmt(tf.width)}″ × ${fmt(tf.depth)}″`,state.selected.kind==='accessory'&&state.selected.id===a.id,'accessory',a.id,true)});return out}
 function renderTree(){if(!state.record){$('wallTree').innerHTML='<div class="empty">No saved room loaded.</div>';$('objectTree').innerHTML='<div class="empty">No closet construction.</div>';return}$('wallTree').innerHTML=state.rooms.map(room=>`<div class="badge">${esc(room.name)}</div>`+room.walls.map(w=>treeButton(w.name,`${fmt(w.length)}″ · ${freeIntervals(w).reduce((a,q)=>a+q[1]-q[0],0).toFixed(1)}″ usable`,isSelected('wall',w.id),'wall',w.id)).join('')).join('');$('objectTree').innerHTML=state.doc.runs.length?state.doc.runs.map((r,i)=>treeButton(`Run ${i+1}`,`${fmt(runWidth(r))}″ · ${r.sections.length} sections`,isSelected('run',r.id),'run',r.id)+r.sections.map((s,j)=>treeButton(`Section ${j+1}`,`${s.type} · ${fmt(s.width)}″`,isSelected('section',s.id),'section',s.id,true)+sectionTreeChildren(r,s)).join('')).join(''):'<div class="empty">Select a wall and choose Add Run.</div>';document.querySelectorAll('[data-kind][data-id]').forEach(el=>el.onclick=e=>select(el.dataset.kind,el.dataset.id,null,e.shiftKey))}
