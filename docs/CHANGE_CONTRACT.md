@@ -38,3 +38,11 @@ Use PASS, FAIL, or NOT TESTED in the final report. A code diff alone is not a PA
 | 6 | Properties offers labeled type icons for open, shelves, hanging, drawers, doors, and shoes. Choosing an icon rebuilds the selected section and persists that build. | Icon clicks, selection state, save/reload | NOT TESTED: build model fixture passes; UI and reload unavailable |
 
 Verification was updated in `docs/RELEASE_REPORT_2026-09-24.md` after browser publication.
+
+## POV drag and image clarity (2026-09-24)
+
+- Baseline: `main` `40d61d0cbf2154eaa9d801c5f7638d85694fa5e9`; Pages entry `index.html` SHA-256 `934db817fd5eee27e3b26ed84a69c5fd9047edc99e70438d1e57f4c5359f8366`.
+- Affected: embedded Closet Builder POV canvas pointer controls, camera pitch persistence, and software raster shading/resolution. Preserve the plan marker and arrow controls, camera collision, room/closet geometry, saved projects, other views, and unrelated UI.
+- Rules: G-01–G-05, C-04, C-05, C-13, P-02/P-03. The attached UX session has repeated POV canvas clicks and arrow use but no canvas camera reaction.
+- Acceptance: (1) dragging POV turns and tilts the *same* plan-linked camera; Shift-drag pans its floor position with collision and no object edits; pointer release/cancel ends it. (2) a short click selects the nearest visible section and opens its editable Properties; Alt-click selects a visible child item. Opaque panels block selection behind them. (3) keyboard arrows move/turn continuously until release on desktop, with on-screen arrows retained for touch; plan marker still synchronizes, saves, and restores; keyboard input fields retain normal arrow behavior. (4) the canvas uses its displayed aspect ratio with a bounded high-resolution backing buffer, depth-tested opaque geometry, flat ceiling from the room footprint, saved ceiling-light fixtures, directional lighting and visible face edges. (5) both front and back views hide geometry behind panels; no geometry changes or unrelated UI changes.
+- Verification: targeted camera/raster unit fixtures; desktop pointer drag and arrow smoke test, reload, both 3D directions, touch-sized viewport and diff review. Unknown material light reflectance is a rendering approximation, not a production finish claim.
