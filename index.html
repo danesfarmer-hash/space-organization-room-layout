@@ -277,8 +277,7 @@ async function saveRoomStateToLibrary(requestedId,roomState){
   if(!id){
     return {ok:false,needsProject:true};
   }
-  const d=readDB();
-</body> <script src="./pov-loader.js"></script<<script src="./pov-loader.js"></script/body> <script src="./pov-loader.js"></script> const i=d.projects.findIndex(p=>p.id===id);
+  const d=readDB();const i=d.projects.findIndex(p=>p.id===id);
   if(i<0){
     return {ok:false,needsProject:true};
   }
@@ -320,9 +319,7 @@ async function getLiveRoomState(requestedId){
   const rec=getRecord(id);
   const stateToUse=liveState||(rec?.state&&Array.isArray(rec.state.points)?JSON.parse(JSON.stringify(rec.state)):null);
   if(!stateToUse)return {ok:false,id,needsRoom:true};
-  // If the live iframe is newer than storage, make the parent record authoritative
-
-<script src="./pov-loader.js"></script>
+  // If the live iframe is newer than storage,
   // before returning it to Closet Builder.
   if(liveState){
     const result=await liveRoomStateToLibrary(id,liveState);
@@ -553,6 +550,5 @@ openFinishedRoomAtStartup();
   }
   if(ALWAYS_ENABLED)start();
   window.SpaceUsabilityMonitor={start,stop,clear:clearSession,export:exportSession,get running(){return running},get events(){return events.slice()}};
-})();
-</script>
-</body></html>
+})();</script>
+<script src="./pov-loader.js"></script></body></html>
