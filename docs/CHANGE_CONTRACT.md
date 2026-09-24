@@ -62,3 +62,21 @@ Verification was updated in `docs/RELEASE_REPORT_2026-09-24.md` after browser pu
 | AC-2 | Length text drag drives geometry and label without perpendicular resizing. | Live label drags, undo and reload | PASS: 54″ became 59 15/16″ with linked opposite wall; perpendicular label drag made no edit; three undos restored 54″ after reload. |
 | AC-3 | Vertex click selects and drag changes its point under constraints. | Live drag and undo | PASS: Point 3 selected and moved, changing connected wall lengths; undo restored the rectangle. |
 | AC-4 | Other target priority, exact editing, pan and room handoff persist. | Browser smoke and diff | NOT TESTED: Closet Builder handoff showed restored 54″ room and reload retained it; hosted-object priority, double-click input and pan were not exercised. |
+
+## POV diagonal navigation and rendering deployment (2026-09-24)
+
+- Request: deploy the cleaner POV rendering plan and make held keyboard arrows behave like a walk/look control. Up + Right walks forward while strafing right; Down + Left walks backward while strafing left. Shift turns the same arrow combinations into head look: Up + Right looks up and right, Down + Left looks down and left.
+- Active repository: `danesfarmer-hash/space-organization-room-layout`, `main`, baseline `d01531505b6f648dedb2d9afee7837059aed1e83`; deployed entry `index.html` with embedded `CLOSET_B64`.
+- Affected: embedded Closet Builder POV keyboard loop, pure navigation intent helper, POV raster backing density, and focused tests. Standalone module files are preserved.
+- Preserved: collision checks, saved viewer camera, pointer drag look/pan, touch arrows, section picking, room geometry, other views, and saved project data.
+- Rules: G-01–G-05, C-04, C-05, C-13, P-02/P-03; latest user instruction controls diagonal head look semantics.
+- Rendering deployment: the active build already contains the cleaner POV raster pipeline with perspective projection, depth-tested opaque faces, room floor/flat ceiling, directional face lighting, visible edges, collision-aware camera, and bounded high-resolution backing. This change deploys that active pipeline together with the navigation update and raises the supersampling ceiling from 1.6× to 2× while retaining the 950,000-pixel safety cap.
+- Deployment: user explicitly requested deployment in this turn.
+
+| Criterion | Exact action and expected effect | Verification | Result |
+| --- | --- | --- | --- |
+| AC-1 | Hold Arrow Up + Right in POV: normalized forward walk plus right strafe, with collision-safe sliding. | Pure intent fixture; browser hold test | PASS: intent fixture; browser hold test NOT TESTED before deployment |
+| AC-2 | Hold Arrow Down + Left in POV: normalized backward walk plus left strafe. | Pure intent fixture; browser hold test | PASS: intent fixture; browser hold test NOT TESTED before deployment |
+| AC-3 | Hold Shift + Up + Right: pitch up and yaw right together; Shift + Down + Left: pitch down and yaw left together. | Pure intent fixture; browser hold test | PASS: both diagonal look fixtures; browser hold test NOT TESTED before deployment |
+| AC-4 | Cleaner POV rendering remains active with bounded supersampling and depth/occlusion pipeline. | Embedded payload check, raster tests, syntax check | PASS: embedded `renderPOV`, depth, ceiling, aspect, and 950,000-pixel tests pass |
+| AC-5 | Existing construction, collision, persistence, and room handoff tests remain passing. | `npm test` | PASS: 23/23 |
