@@ -44,3 +44,18 @@ test('POV keyboard intent combines diagonal walking and diagonal head look',()=>
   assert.deepEqual({...look},{yaw:1,pitch:1});
   assert.deepEqual({...ctx.povNavigationIntent(new Set(['ArrowDown','ArrowLeft']),true)},{yaw:-1,pitch:-1});
 });
+
+test('POV trackpad zoom changes perspective scale and clamps to a safe range',()=>{
+  const state={viewerCamera:{x:0,y:0,yaw:0,pitch:0,zoom:1}};
+  let renders=0,persisted=0;
+  const ctx=vm.createContext({state,Math,Number,n:(v,d=0)=>Number.isFinite(Number(v))?Number(v):d,persistViewerCamera:()=>persisted++,renderCanvas:()=>renders++});
+  vm.runInContext(source(closet,'povZoomByGesture'),ctx);
+  assert.equal(ctx.povZoomByGesture(-120),true);
+  assert.ok(state.viewerCamera.zoom>1);
+  assert.equal(ctx.povZoomByGesture(120),true);
+  assert.ok(state.viewerCamera.zoom<1.2);
+  ctx.povZoomByGesture(100000);
+  assert.equal(state.viewerCamera.zoom,.65);
+  assert.equal(renders,3);
+  assert.equal(persisted,3);
+});
