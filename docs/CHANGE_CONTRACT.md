@@ -80,3 +80,16 @@ Verification was updated in `docs/RELEASE_REPORT_2026-09-24.md` after browser pu
 | AC-3 | Hold Shift + Up + Right: pitch up and yaw right together; Shift + Down + Left: pitch down and yaw left together. | Pure intent fixture; browser hold test | PASS: both diagonal look fixtures; browser hold test NOT TESTED before deployment |
 | AC-4 | Cleaner POV rendering remains active with bounded supersampling and depth/occlusion pipeline. | Embedded payload check, raster tests, syntax check | PASS: embedded `renderPOV`, depth, ceiling, aspect, and 950,000-pixel tests pass |
 | AC-5 | Existing construction, collision, persistence, and room handoff tests remain passing. | `npm test` | PASS: 23/23 |
+
+## POV trackpad zoom (2026-09-24)
+
+- Request: in Closet Builder POV, a two-finger trackpad drag must zoom the view in and out without moving the camera or editing geometry.
+- Active build: `index.html` remains the deployed entry point with the embedded Closet Builder payload. Preserve keyboard walk/look, pointer look/pan, collision, section picking, flat ceiling, depth-tested raster rendering, and saved camera state.
+- Implementation: route POV canvas wheel events (the browser event produced by a two-finger trackpad scroll) to a bounded perspective-scale control, with a visible hint in the POV overlay.
+- Verification: pure zoom helper fixture, syntax check, full `npm test`, and live browser walkthrough on a saved room/run.
+
+| Criterion | Exact action and expected effect | Verification | Result |
+| --- | --- | --- | --- |
+| AC-1 | Two-finger drag up/down over POV zooms in/out, preserving camera position and geometry. | Zoom helper fixture and live wheel event | PENDING |
+| AC-2 | Zoom remains bounded and does not affect plan/elevation zoom state. | Clamp fixture and view switch smoke test | PENDING |
+| AC-3 | Existing POV navigation, selection, and construction tests remain passing. | `npm test` | PENDING |
