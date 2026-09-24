@@ -23,3 +23,25 @@
 Additional requested interactions: the Properties icon set displayed Open, Shelves, Double Hang, Long Hang, Drawers, Doors, and Shoe Shelves; clicking Drawers created its build. POV arrow controls and the plan marker responded to clicks and dragging, but the small-room image showed broad flat panels, so room-facing front rendering is NOT TESTED. Browser evidence is retained with the task response. The app is published, but the incomplete geometry and mobile gates prevent a full behavior certification.
 
 Unresolved specification: the app has generic drawer deductions but no selected hardware/front catalog. Exact hardware gap and slide clearance cannot be certified. Door hinge hand and exact swing remain unresolved.
+
+## Room Layout axis drag and direct length release
+
+- Scope: embedded Room Layout wall-body and dimension-label pointer behavior, plus repeatable axis tests and rule R-05. Baseline `main` `42fe5e2a95e8bd1349e5366d12462d8b59d158f3`; app file baseline SHA-256 `48d8de0ddfc4c77985ab7742e4bf74057e6de79d1cdbde04b35305d18913ad02`.
+- Published app commit `7cc97c3016a3f5b6ceb26ad065edeb3b38ce809d`; final `main` test commit `4259744959f627b4af84aebf7332a64f04229eca`. Pages deployment #62 and Rules checks #14 succeeded at the latter commit. The deployed app was opened in cloud Chromium at 1363 × 936 on Linux.
+- Local `npm test`: 22/22 PASS; extracted embedded Room script parsed; `git diff --check` passed. The app diff changes only the embedded Room payload in `index.html`; Closet Builder and standalone HTML files were not edited.
+- Live fixture: Fixture QA → Room Sync Test → Two Wall, initially 54 × 37″. Dragging its top length label along the wall changed the room to 59 15/16 × 37″ and mirrored the opposite wall. Perpendicular label drag did not resize. Perpendicular wall-body drag left geometry unchanged; tangent drag shifted the top endpoints and showed 60″. Point 3 selected and dragged, changing connected wall dimensions. Three undos restored the 54 × 37″ rectangle. Closet Builder showed Wall 1 at 54″; reload and reopen retained the restored room. No named revision was overwritten.
+
+| # | Gate | Result | Evidence and limit |
+| --- | --- | --- | --- |
+| 1 | App preservation | PASS | Only approved embedded Room interaction, R-05, contract, and focused test changed from the starting build; visible toolbar and panels remained in place. |
+| 2 | Geometry invariants | NOT TESTED | Room wall endpoint and dimension behavior passed; closet component bounds and 3D intersections were outside this focused test. |
+| 3 | Section dimensions | NOT TESTED | Closet sections were not changed or compared in elevation/3D. |
+| 4 | Shared partitions | NOT TESTED | No closet partition edit. Existing automated fixtures passed. |
+| 5 | Clearances | NOT TESTED | Doors, utilities, hardware, and allowances were not changed or visually checked. |
+| 6 | Corner ownership | NOT TESTED | No corner run edit. |
+| 7 | Filler placement | NOT TESTED | No filler edit. |
+| 8 | 3D boundaries and visibility | NOT TESTED | No 3D view comparison in this release check. |
+| 9 | Drawer bank | NOT TESTED | No drawer edit. Existing automated fixtures passed. |
+| 10 | Save and sync | PASS | After undo, Closet Builder showed 54″ wall; reload/reopen retained the 54 × 37″ room. Named-revision creation was not exercised. |
+
+Desktop axis wall, label, vertex, undo, handoff, and reload interactions passed. Double-click exact dimension editing, hosted-object hit priority, plan pan, angled-wall browser drag, and mobile touch remain NOT TESTED; numeric horizontal/angled axis fixtures passed. The deployed feature is available, with those workflow limits recorded rather than certified.

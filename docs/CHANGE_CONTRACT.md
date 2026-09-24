@@ -58,7 +58,7 @@ Verification was updated in `docs/RELEASE_REPORT_2026-09-24.md` after browser pu
 
 | Criterion | Exact action and expected state/render/saved effect | Verification method | Result |
 | --- | --- | --- | --- |
-| AC-1 | Wall follows tangent; perpendicular gesture changes nothing. | Model and browser drag | PENDING |
-| AC-2 | Length text drag drives geometry and label without perpendicular resizing. | Model and browser drag, undo/reload | PENDING |
-| AC-3 | Vertex click selects and drag changes its point under constraints. | Browser drag, undo/reload | PENDING |
-| AC-4 | Other target priority, exact editing, pan and room handoff persist. | Browser smoke and diff | PENDING |
+| AC-1 | Wall follows tangent; perpendicular gesture changes nothing. | Numeric fixtures and live plan drags | PASS: perpendicular drag retained 59 15/16″; axial drag moved top endpoints and yielded 60″. |
+| AC-2 | Length text drag drives geometry and label without perpendicular resizing. | Live label drags, undo and reload | PASS: 54″ became 59 15/16″ with linked opposite wall; perpendicular label drag made no edit; three undos restored 54″ after reload. |
+| AC-3 | Vertex click selects and drag changes its point under constraints. | Live drag and undo | PASS: Point 3 selected and moved, changing connected wall lengths; undo restored the rectangle. |
+| AC-4 | Other target priority, exact editing, pan and room handoff persist. | Browser smoke and diff | NOT TESTED: Closet Builder handoff showed restored 54″ room and reload retained it; hosted-object priority, double-click input and pan were not exercised. |
