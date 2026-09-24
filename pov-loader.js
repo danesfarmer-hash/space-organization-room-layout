@@ -1,5 +1,5 @@
 (() => {
-  const build = new URLSearchParams(location.search).get('v');
+  const build = new URLSearchParams(location.search).get('v') || 'a6e3b9e891f6';
   const src = new URL(`./pov-webgl.js${build ? `?v=${encodeURIComponent(build)}` : ''}`, document.baseURI).href;
   const inject = (frame) => {
     if (!frame?.contentDocument || frame.dataset.povGpuLoaded === '1') return;
