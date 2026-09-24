@@ -1,0 +1,1 @@
+/* GPU POV renderer placeholder */
