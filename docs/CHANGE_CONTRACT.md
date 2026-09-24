@@ -46,3 +46,19 @@ Verification was updated in `docs/RELEASE_REPORT_2026-09-24.md` after browser pu
 - Rules: G-01–G-05, C-04, C-05, C-13, P-02/P-03. The attached UX session has repeated POV canvas clicks and arrow use but no canvas camera reaction.
 - Acceptance: (1) dragging POV turns and tilts the *same* plan-linked camera; Shift-drag pans its floor position with collision and no object edits; pointer release/cancel ends it. (2) a short click selects the nearest visible section and opens its editable Properties; Alt-click selects a visible child item. Opaque panels block selection behind them. (3) keyboard arrows move/turn continuously until release on desktop, with on-screen arrows retained for touch; plan marker still synchronizes, saves, and restores; keyboard input fields retain normal arrow behavior. (4) the canvas uses its displayed aspect ratio with a bounded high-resolution backing buffer, depth-tested opaque geometry, flat ceiling from the room footprint, saved ceiling-light fixtures, directional lighting and visible face edges. (5) both front and back views hide geometry behind panels; no geometry changes or unrelated UI changes.
 - Verification: targeted camera/raster unit fixtures; desktop pointer drag and arrow smoke test, reload, both 3D directions, touch-sized viewport and diff review. Unknown material light reflectance is a rendering approximation, not a production finish claim.
+
+## Room Layout axis and direct dimensions (2026-09-24)
+
+- Request: wall-body drags move only along their own tangent; wall length numbers and room vertices are direct selectable drag targets.
+- Baseline: `danesfarmer-hash/space-organization-room-layout`, `main` `42fe5e2a95e8bd1349e5366d12462d8b59d158f3`, Pages entry `index.html` SHA-256 `48d8de0ddfc4c77985ab7742e4bf74057e6de79d1cdbde04b35305d18913ad02`.
+- Affected: embedded Room Layout wall drag, dimension label pointer behavior, vertex handles and guidance; focused tests. Preserve room items, door/window ownership, plan pan, double-click exact dimension editing, saved projects, Closet Builder payload and unrelated UI.
+- Rules: G-01–G-05, R-01–R-03, R-05, P-02/P-03. Existing code already projects wall translations onto their tangent; the dimension label currently only repositions its annotation.
+- Acceptance: AC-1 dragging a wall along its tangent moves its endpoint pair with no perpendicular drift; perpendicular-only movement does not create an edit or undo step. AC-2 dragging its length value along the wall changes the displayed and saved length on the 1/16 in edit grid, with split bounds and linked rectangle behavior retained; perpendicular-only movement does not resize it. AC-3 visible room vertices select and drag with the existing corner and split-point constraints; drag is one undo step, click is not. AC-4 wall-hosted objects retain hit priority and plan pan, exact input, save/reload, and Closet Builder room handoff still work.
+- Verification: numeric horizontal/vertical/diagonal fixture and desktop browser gestures, undo/redo, dimension input, save/reload, module switch. Deployment to Pages is authorized by the standing user request to publish updates unless blocked by a critical error.
+
+| Criterion | Exact action and expected state/render/saved effect | Verification method | Result |
+| --- | --- | --- | --- |
+| AC-1 | Wall follows tangent; perpendicular gesture changes nothing. | Model and browser drag | PENDING |
+| AC-2 | Length text drag drives geometry and label without perpendicular resizing. | Model and browser drag, undo/reload | PENDING |
+| AC-3 | Vertex click selects and drag changes its point under constraints. | Browser drag, undo/reload | PENDING |
+| AC-4 | Other target priority, exact editing, pan and room handoff persist. | Browser smoke and diff | PENDING |
