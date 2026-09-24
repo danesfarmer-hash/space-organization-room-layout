@@ -13,3 +13,33 @@ function gpuPovCreateGL(canvas){const gl=canvas.getContext('webgl2',{alpha:false
 function gpuPovRender(){const canvas=$('povCanvas'),cam=state.viewerCamera;if(!window.__povGLState){try{window.__povGLState=gpuPovCreateGL(canvas);}catch(err){window.__povGLState=null;return false;}}if(!window.__povGLState)return false;const gl=window.__povGLState.gl,size=gpuPovSize(canvas);if(canvas.width!==size.width)canvas.width=size.width;if(canvas.height!==size.height)canvas.height=size.height;gl.viewport(0,0,size.width,size.height);gl.enable(gl.DEPTH_TEST);gl.depthFunc(gl.LESS);gl.disable(gl.CULL_FACE);gl.clearColor(.86,.9,.93,1);gl.clear(gl.COLOR_BUFFER_BIT|gl.DEPTH_BUFFER_BIT);if(!cam){povHit=null;return true;}const faces=gpuPovBuildFaces(),frame=gpuPovCameraFrame(cam),projection=gpuPovProjection(size.width,size.height,cam),positions=[],colors=[],normals=[];for(const face of faces){const polygon=gpuPovClipFace(face.pts,cam,frame);if(polygon.length<3)continue;const nrm=gpuPovFaceNormal(face.pts),normal={x:nrm.x*frame.right.x+nrm.y*frame.right.y+nrm.z*frame.right.z,y:nrm.x*frame.up.x+nrm.y*frame.up.y+nrm.z*frame.up.z,z:-(nrm.x*frame.forward.x+nrm.y*frame.forward.y+nrm.z*frame.forward.z)},rgb=gpuPovFaceRGB(face);for(let i=1;i<polygon.length-1;i++)for(const p of [polygon[0],polygon[i],polygon[i+1]]){const q=gpuPovCameraPoint(p,cam,frame);positions.push(q.x,q.y,q.z);colors.push(rgb[0],rgb[1],rgb[2]);normals.push(normal.x,normal.y,normal.z);}}gl.useProgram(window.__povGLState.program);const bind=(buffer,attribute,data)=>{gl.bindBuffer(gl.ARRAY_BUFFER,buffer);gl.bufferData(gl.ARRAY_BUFFER,new Float32Array(data),gl.DYNAMIC_DRAW);gl.enableVertexAttribArray(attribute);gl.vertexAttribPointer(attribute,3,gl.FLOAT,false,0,0);};bind(window.__povGLState.positionBuffer,window.__povGLState.position,positions);bind(window.__povGLState.colorBuffer,window.__povGLState.color,colors);bind(window.__povGLState.normalBuffer,window.__povGLState.normal,normals);gl.uniformMatrix4fv(window.__povGLState.projection,false,projection.matrix);const lightWorld={x:-.42,y:-.58,z:.78},lightCam=[lightWorld.x*frame.right.x+lightWorld.y*frame.right.y,lightWorld.x*frame.up.x+lightWorld.y*frame.up.y,-(lightWorld.x*frame.forward.x+lightWorld.y*frame.forward.y+lightWorld.z*frame.forward.z)];gl.uniform3fv(window.__povGLState.light,new Float32Array(lightCam));const lights=(state.rooms||[]).reduce((count,room)=>count+(room.raw?.lights||[]).filter(l=>l.surface==='ceiling').length,0);gl.uniform1f(window.__povGLState.fill,lights?.08:.045);gl.drawArrays(gl.TRIANGLES,0,positions.length/3);gpuPovUpdateHit(faces,cam,canvas);return true;}
 function gpuPovStill(){if(state.view!=='pov')return;const prior=window.__povStill;window.__povStill=true;render();requestAnimationFrame(()=>{const canvas=$('povCanvas'),link=document.createElement('a');link.download=`space-organization-pov-${Date.now()}.png`;link.href=canvas.toDataURL('image/png');link.click();window.__povStill=prior;render();});}
 window.renderPOV=function(){if(gpuPovRender())return;return legacyRenderPOV?.();};function installPOVStill(){const bottom=document.querySelector('.bottom');if(!bottom||document.getElementById('stillBtn'))return;const b=document.createElement('button');b.id='stillBtn';b.type='button';b.textContent='STILL';b.title='Download a high-resolution POV render';b.addEventListener('click',gpuPovStill);bottom.appendChild(b);}if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',installPOVStill,{once:true});else installPOVStill();})();
+
+(()=>{
+function gpuPovDrawerAction(picked,resolve=component){
+  if(!picked||picked.kind!=='component')return null;
+  const found=resolve(picked.id);
+  if(!found?.component||found.component.type!=='drawer')return null;
+  return{found,opening:!found.component.open};
+}
+function gpuPovDrawerClick(picked){
+  const action=gpuPovDrawerAction(picked);
+  if(!action)return false;
+  const{found,opening}=action;
+  commit(opening?'Opened drawer':'Closed drawer',()=>{
+    state.selected={kind:'section',id:found.section.id,parentId:found.run.id};
+    toggleDrawer(found.component.id);
+  });
+  return true;
+}
+const canvas=$('povCanvas');
+if(canvas&&!canvas.dataset.povDrawerClick){
+  canvas.dataset.povDrawerClick='1';
+  canvas.addEventListener('click',event=>{
+    if(state.view!=='pov')return;
+    const picked=povPickAt(event.clientX,event.clientY,true);
+    if(!gpuPovDrawerClick(picked))return;
+    event.preventDefault();
+    event.stopImmediatePropagation();
+  },true);
+}
+})();
