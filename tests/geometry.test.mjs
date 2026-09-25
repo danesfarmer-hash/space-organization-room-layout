@@ -23,9 +23,7 @@ const names = [
   'sectionDepth', 'rebuildPartitions', 'runTouchesWallCorner',
   'sharedRunCorners', 'preferredWidthPlan', 'attachCorner',
   'resolveCornerAccessFillers', 'preferredWidthPenalty', 'avoidElectrical',
-  'planPoint', 'svg', 'renderPlanOverlays', 'saveToProject',
-  'overlayExtent', 'faceDimensions', 'frontGeometry', 'fillerSolidGeometry',
-  'solidOverlap', 'constructionSolids', 'constructionGeometryIssues'
+  'planPoint', 'svg', 'renderPlanOverlays', 'saveToProject'
 ];
 
 function harness() {
@@ -48,7 +46,7 @@ function harness() {
       return el;
     }}
   });
-  vm.runInContext(`const MM=1/25.4, CORNER_FILLER_MIN=10, CORNER_FILLER_MAX=13; const DEFAULTS={partition:.75,shelf:.75,toeKick:64*MM,toeSetback:.75,faceGap:4*MM}; ${names.map(sourceOf).join('\n')}`, ctx);
+  vm.runInContext(`const CORNER_FILLER_MIN=10, CORNER_FILLER_MAX=13; const PREFERRED_SECTION_WIDTHS=[18,24,30,36]; ${names.map(sourceOf).join('\n')}`, ctx);
   const call = (name, ...args) => ctx[name](...args);
   return {state, ctx, call, elements, db: () => db, setDB: value => { db = structuredClone(value); }};
 }
@@ -157,67 +155,4 @@ test('P-02/P-03: save retains custom dimensions and room state in same project r
   assert.equal(saved.closetState.runs[0].sections[0].width, 23.5);
   assert.equal(saved.clientName, 'Fixture Client');
   assert.equal(h.state.dirty, false);
-});
-
-test('overlay contract: half overlay leaves a centered four millimeter partition gap', () => {
-  const h = harness(), thickness = .75, gap = 4 / 25.4;
-  const half = h.call('overlayExtent', 'half', thickness), full = h.call('overlayExtent', 'full', thickness);
-  assert.ok(Math.abs(half - (thickness / 2 - 2 / 25.4)) < 1e-9);
-  assert.ok(Math.abs(full - (thickness - gap)) < 1e-9);
-  const left = {id:'left', width:24}, right = {id:'right', width:24};
-  const r = {thickness, sections:[left,right], height:84};
-  const lf = h.call('frontGeometry', r, left), rf = h.call('frontGeometry', r, right);
-  const partitionInner = left.width;
-  const leftEdge = lf.xOffset + lf.width;
-  const rightEdge = left.width + thickness + rf.xOffset;
-  assert.ok(Math.abs(rightEdge - leftEdge - gap) < 1e-9, 'the gap is exactly four millimeters');
-  assert.ok(leftEdge < partitionInner + thickness / 2 && rightEdge > partitionInner + thickness / 2, 'fronts stop on opposite sides of the centerline');
-});
-
-test('overlay contract: full overlay uses the physical panel thickness on outside edges', () => {
-  const h = harness(), r = {thickness:.75, sections:[{id:'only',width:24}], height:84};
-  const face = h.call('faceDimensions', r, r.sections[0]);
-  assert.equal(face.overlayModeLeft, 'full');
-  assert.equal(face.overlayModeRight, 'full');
-  assert.ok(Math.abs(face.overlayLeft - (.75 - 4 / 25.4)) < 1e-9);
-  assert.equal(face.overlayLeft, face.overlayRight);
-  assert.equal(face.width, 24 + 2 * face.overlayLeft);
-});
-
-test('filler contract: only KT, KB, and a matching toe kick are solids', () => {
-  const h = harness();
-  h.ctx.cornerBridgeGeometry = () => ({originOffset:0, depth:14, width:12});
-  h.ctx.fillerShelfLevels = () => ({bottomZ:2.5,bottomThickness:.75,topZ:83.25,topThickness:.75});
-  const r = {id:'terminating', offset:0, depth:14, wallId:'wall', fillerStart:12, fillerEnd:0};
-  const parts = h.call('fillerSolidGeometry', r, 'start', {ownerRunId:'owner'});
-  assert.deepEqual(Array.from(parts.map(p => p.kind)), ['KB','KT','toe-kick']);
-  assert.equal(parts.length, 3);
-  assert.equal(parts.some(p => /face|panel/i.test(p.kind)), false);
-  assert.equal(parts[2].w, parts[0].w);
-});
-
-test('solid validator distinguishes boundary contact from unintended volume intersection', () => {
-  const h = harness();
-  const base = {center:{x:0,y:0},ux:1,uy:0,vx:0,vy:1,w:10,d:10,z:0,h:10};
-  const touching = {...base,center:{x:10,y:0}};
-  const overlap = {...base,center:{x:9.9,y:0}};
-  assert.equal(h.call('solidOverlap', base, touching), false);
-  assert.equal(h.call('solidOverlap', base, overlap), true);
-});
-
-test('construction geometry validator catches a real drawer-box and shelf intersection', () => {
-  const h = harness(), host = {id:'wall', a:{x:0,y:0}, ux:1, uy:0, nx:0, ny:1};
-  h.ctx.wall = id => id === 'wall' ? host : null;
-  h.ctx.run = id => h.state.doc.runs.find(r => r.id === id) || null;
-  h.ctx.componentTransform = (_r,s,c) => ({xOffset:0,width:s.width,depth:s.depth});
-  h.ctx.drawerBox = () => ({width:22,depth:13,height:4});
-  h.ctx.drawerPresentation = () => ({extension:0});
-  h.ctx.accessoryTransform = () => ({xOffset:0,width:1,depth:1,height:1,z:60});
-  const s = {id:'section',width:24,depth:14,components:[{id:'drawer',type:'drawer',z:4,height:6,boxWidth:22,boxDepth:13,boxHeight:4}],accessories:[]};
-  const r = {id:'run',wallId:'wall',offset:0,thickness:.75,depth:14,height:84,fillerStart:0,fillerEnd:0,sections:[s],partitions:[{id:'p0',depth:14},{id:'p1',depth:14}]};
-  h.state.doc.runs=[r];
-  assert.deepEqual(Array.from(h.call('constructionGeometryIssues')), []);
-  s.components.push({id:'bad-shelf',type:'shelf',z:5,thickness:.75,depth:14});
-  const issues = h.call('constructionGeometryIssues');
-  assert.ok(issues.some(issue => /drawer-box.*bad-shelf|bad-shelf.*drawer-box/.test(issue.message)));
 });

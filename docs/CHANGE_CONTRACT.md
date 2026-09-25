@@ -163,3 +163,16 @@ Verification was updated in `docs/RELEASE_REPORT_2026-09-24.md` after browser pu
 - Preserve: project geometry, local project records, POV drawer action, camera, existing explicit image preferences, unrelated UI.
 - Rules: G-01–G-05, V-01–V-03; no geometry change.
 - Acceptance: new preference state displays Ideal selected with 100% brightness, 58% ambient, 45% shadows, 108% contrast, slight warmth, and High quality; Reset restores it; changing a control marks Custom; high quality exceeds native resolution on a 1× display without exceeding 1.8 million pixels; no-fixture closet remains legible. Browser visual review of the published revision is required before a full visual PASS claim.
+
+## Restore the 6:42 PM published app (2026-09-24 Chicago)
+
+- Request: restore the working app from around 7:15 PM, before the later changes. The latest published commit before that time is `b2dfd9d` at 6:42:39 PM CDT.
+- Starting `main`: `712bf74` at 10:18 PM CDT. GitHub Pages serves `index.html`; the embedded Room Layout and Closet Builder are its active app. Restore the active entry and its two subsequently changed test files exactly from `b2dfd9d`. Keep historical rule/contract/report text for traceability and add this superseding rollback record. Do not change customer project storage.
+- Governing rules: G-01, G-02, G-03, G-05, O-01. The newer feature contracts remain historical records; their post-7:15 app implementations are withdrawn by this restore.
+
+| Criterion | Verification | Result |
+| --- | --- | --- |
+| Active app matches 6:42 PM release byte for byte | Compare `index.html` Git blob with `b2dfd9d:index.html` | PASS locally |
+| Newer app code is absent; historical later commits remain recoverable | Inspect source diff and history | PASS locally |
+| Baseline automated regression suite passes | `npm test` | PASS locally: 24/24 |
+| GitHub Pages serves the restored app | Push and confirm deployment | PENDING |

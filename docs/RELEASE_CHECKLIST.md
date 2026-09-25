@@ -66,3 +66,21 @@ Focused criteria: default no-fixture fallback luminance PASS in test; GPU shader
 | 8 | 3D boundaries and visibility | NOT TESTED | Depth fixture passes; live two-direction Ideal image review pending. |
 | 9 | Drawer bank behavior | NOT TESTED | Existing drawer model/click fixtures pass; live drawer interaction pending. |
 | 10 | Save and sync | NOT TESTED | Existing fixtures pass; project save/reopen not run. POV preference uses a separate local key. |
+
+## Exact source rollback to 6:42 PM release — 2026-09-24 Chicago
+
+- Scope: restore the active Pages app entry and baseline tests from `b2dfd9d`; starting `main` was `712bf74`. The entry blob comparison is exact; `npm test` passes 24/24. No new behavior fix is claimed.
+- Browser and viewport: NOT TESTED locally. Customer projects were not opened or modified. Deployment commit/status: see final report after publish.
+
+| # | Gate | Result | Evidence and limit |
+| --- | --- | --- | --- |
+| 1 | App preservation | PASS | Active `index.html` blob exactly equals the 6:42 PM published source; later history is recoverable. |
+| 2 | Geometry invariants | NOT TESTED | Baseline automated geometry checks pass; live rendered bounds not inspected. |
+| 3 | Section dimensions | NOT TESTED | Baseline source restored; no cross-view browser measurement. |
+| 4 | Shared partitions | NOT TESTED | Baseline automated fixtures pass; no rendered count inspection. |
+| 5 | Clearances | NOT TESTED | No live clearance inspection. |
+| 6 | Corner ownership | NOT TESTED | Baseline numeric fixtures pass; live ownership flip not performed. |
+| 7 | Filler placement | NOT TESTED | Baseline fixtures pass; no visual seam inspection. |
+| 8 | 3D boundaries and visibility | NOT TESTED | Baseline depth fixture passes; two-direction visual inspection not performed. |
+| 9 | Drawer bank | NOT TESTED | Baseline bank fixtures pass; no live mini-drawer workflow. |
+| 10 | Save and sync | NOT TESTED | Baseline persistence fixtures pass; no customer or disposable project reload. |

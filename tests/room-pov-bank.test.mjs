@@ -4,22 +4,19 @@ import {readFileSync} from 'node:fs';
 import vm from 'node:vm';
 
 const entry=readFileSync(new URL('../index.html',import.meta.url),'utf8');
-const gpuPov=readFileSync(new URL('../pov-webgl.js',import.meta.url),'utf8');
-const loader=readFileSync(new URL('../pov-loader.js',import.meta.url),'utf8');
 const closet=Buffer.from(entry.match(/const CLOSET_B64="([A-Za-z0-9+/=]+)";/)?.[1]||'','base64').toString();
 assert.ok(closet.includes('function renderPOV('));
 const suite=entry.slice(entry.indexOf('function roomContentSignature('));
 function source(text,name){const start=text.indexOf(`function ${name}(`);assert.ok(start>=0,name);const next=text.indexOf('\nfunction ',start+1);return text.slice(start,next<0?undefined:next)}
 const defaults={shelf:.75,toeKick:64/25.4,faceGap:4/25.4,drawerSideDeduction:1.0625,drawerDepthDeduction:1,drawerHeightDeduction:1.5};
 function bankHarness(){let serial=0;const ctx=vm.createContext({Math,Number,Error,DEFAULTS:defaults,PITCH32:32/25.4,n:(v,d=0)=>Number.isFinite(Number(v))?Number(v):d,round:(x,p)=>Math.round(x/p)*p,fmt:v=>v.toFixed(2),uid:()=>`c${++serial}`});
-  vm.runInContext(`const system32={nearest(v){return Math.round((v-${9.5/25.4})/PITCH32)*PITCH32+${9.5/25.4}},snapDown(v){return Math.floor((v-${9.5/25.4}+1e-7)/PITCH32)*PITCH32+${9.5/25.4}}};${['makeComponent','fixedShelf','bankShelves','stackDrawers','alignDrawerBanks'].map(n=>source(closet,n)).join('\n')}`,ctx);
+  vm.runInContext(`const system32={nearest(v){return Math.round((v-${9.5/25.4})/PITCH32)*PITCH32+${9.5/25.4}},snapDown(v){return Math.floor((v-${9.5/25.4}+1e-7)/PITCH32)*PITCH32+${9.5/25.4}}};${['makeComponent','fixedShelf','bankShelves','stackDrawers'].map(n=>source(closet,n)).join('\n')}`,ctx);
   const bottom={type:'shelf',kind:'KB',z:defaults.toeKick,thickness:.75},top={type:'shelf',kind:'KM',z:42,thickness:.75},upper={type:'shelf',kind:'adjustable',z:60,thickness:.75};
   const drawers=[0,1,2,3].map((_,i)=>({type:'drawer',variant:'standard',z:3+i*9,height:8.5}));
   return {ctx,s:{components:[bottom,...drawers,top,upper]},bottom,top,upper,drawers};
 }
-test('mini drawer recalculates the bank with exact 4 mm visible gaps and moves only upper shelves',()=>{const h=bankHarness(),r={height:84};h.ctx.stackDrawers(r,h.s);const prior=h.top.z;const mini={type:'drawer',variant:'mini',height:3,z:prior};h.s.components.push(mini);h.ctx.stackDrawers(r,h.s);assert.ok(h.top.z>prior);assert.ok(h.upper.z>h.top.z+.75);assert.ok(h.drawers[0].z>=h.bottom.z+.75+defaults.faceGap-1e-3);const all=[...h.s.components.filter(c=>c.type==='drawer')].sort((a,b)=>a.z-b.z);for(let i=1;i<all.length;i++){assert.ok(Math.abs(all[i].z-(all[i-1].z+all[i-1].height+defaults.faceGap))<1e-4);assert.ok(all[i-1].z+all[i-1].height<h.top.z)}assert.ok(Math.abs(h.top.z-(all.at(-1).z+all.at(-1).height+defaults.faceGap))<1e-4);assert.equal(h.s.components.filter(c=>c.kind==='KB').length,1)});
-test('bank rejects a mini drawer that cannot fit without overlapping the top shelf',()=>{const h=bankHarness();h.ctx.stackDrawers({height:58},h.s);h.s.components.push({type:'drawer',variant:'mini',height:3,z:45});assert.throws(()=>h.ctx.stackDrawers({height:44},h.s),/no usable space|Drawer bank needs/)});
-test('four adjacent drawer banks align rows and retain 4 mm reveals',()=>{const base=bankHarness(),sections=Array.from({length:4},(_,bank)=>({id:`bank-${bank}`,width:24,components:[{type:'shelf',kind:'KB',z:defaults.toeKick,thickness:.75},{type:'drawer',height:8.5,z:3},{type:'drawer',height:8.5,z:12},{type:'drawer',height:8.5,z:21},{type:'drawer',height:8.5,z:30},{type:'shelf',kind:'KM',z:42,thickness:.75}]})),r={height:84,sections};sections.forEach(s=>base.ctx.stackDrawers(r,s));base.ctx.alignDrawerBanks(r);const rows=sections.map(s=>s.components.filter(c=>c.type==='drawer').sort((a,b)=>a.z-b.z));for(let i=0;i<4;i++){assert.ok(rows.every(list=>Math.abs(list[i].z-rows[0][i].z)<1e-4));if(i)assert.ok(Math.abs(rows[0][i].z-(rows[0][i-1].z+rows[0][i-1].height+defaults.faceGap))<1e-4)}const kms=sections.map(s=>s.components.find(c=>c.kind==='KM'));assert.ok(kms.every(k=>Math.abs(k.z-kms[0].z)<1e-4));assert.ok(Math.abs(kms[0].z-(rows[0].at(-1).z+rows[0].at(-1).height+defaults.faceGap))<1e-4)});
+test('mini drawer recalculates the bank on mounting rows and moves only upper shelves',()=>{const h=bankHarness(),r={height:84};h.ctx.stackDrawers(r,h.s);const prior=h.top.z;const mini={type:'drawer',variant:'mini',height:3,z:prior};h.s.components.push(mini);h.ctx.stackDrawers(r,h.s);assert.ok(h.top.z>prior);assert.ok(h.upper.z>h.top.z+.75);assert.ok(h.drawers[0].z>=h.bottom.z+.75+defaults.faceGap-1e-3);for(const d of [...h.drawers,mini]){const row=(d.mountZ-9.5/25.4)/(32/25.4);assert.ok(Math.abs(row-Math.round(row))<1e-3);assert.ok(d.z+d.height<h.top.z)}assert.equal(h.s.components.filter(c=>c.kind==='KB').length,1)});
+test('bank rejects a mini drawer that cannot fit without overlapping the top shelf',()=>{const h=bankHarness();h.ctx.stackDrawers({height:58},h.s);h.s.components.push({type:'drawer',variant:'mini',height:3,z:45});assert.throws(()=>h.ctx.stackDrawers({height:44},h.s),/Drawer bank needs/)});
 test('adding a drawer to an open section creates one top bank boundary',()=>{const h=bankHarness();h.s.components=h.s.components.filter(c=>c!==h.top);h.ctx.stackDrawers({height:84},h.s);assert.equal(h.s.components.filter(c=>c.kind==='KM').length,1);assert.ok(h.s.components.find(c=>c.kind==='KM').z>h.drawers.at(-1).z+h.drawers.at(-1).height)});
 
 function cameraHarness(){const state={rooms:[],doc:{runs:[]},viewerCamera:null,record:null};const ctx=vm.createContext({state,Math,Number,Error,CAMERA_RADIUS:3,CAMERA_EYE:64,n:(v,d=0)=>Number.isFinite(Number(v))?Number(v):d,pointInPoly:(p,poly)=>p.x>0&&p.x<100&&p.y>0&&p.y<80,wall:id=>state.rooms[0].walls.find(w=>w.id===id),runWidth:r=>r.width,sectionDepth:(r,s)=>s.depth,renderCanvas:()=>{},persistViewerCamera:()=>{},toast:()=>{}});vm.runInContext(['obstacleBasis','cameraFits','setViewerCamera','moveViewer'].map(n=>source(closet,n)).join('\n'),ctx);const points=[{x:0,y:0},{x:100,y:0},{x:100,y:80},{x:0,y:80}],walls=points.map((a,i)=>{const b=points[(i+1)%4],dx=b.x-a.x,dy=b.y-a.y,L=Math.hypot(dx,dy);return{id:`w${i}`,a,b,length:L,ux:dx/L,uy:dy/L,nx:-dy/L,ny:dx/L,roomKey:'main'}});state.rooms=[{key:'main',closed:true,points,walls,obstacles:[]}];return{ctx,state}}
@@ -28,12 +25,8 @@ test('camera cannot enter a standing-height appliance footprint',()=>{const {ctx
 
 test('room recovery is dated, deduplicated, and separate from named revisions',()=>{let db={projects:[{id:'p',state:{points:[{x:0,y:0},{x:10,y:0}]},revisions:[{id:'named',number:1}]}]},serial=0;const ctx=vm.createContext({Map,JSON,Date,Array,now:()=>new Date('2026-09-24T12:34:56Z').toISOString(),uid:()=>`rec${++serial}`,readDB:()=>structuredClone(db),writeDB:v=>{db=structuredClone(v)},getRecord:id=>db.projects.find(p=>p.id===id)});vm.runInContext([source(suite,'roomContentSignature'),source(suite,'captureRoomEntry'),source(suite,'createRecoverySnapshot')].join('\n'),ctx);ctx.captureRoomEntry('p');const changed={points:[{x:0,y:0},{x:20,y:0}]};assert.equal(ctx.createRecoverySnapshot('p',changed).created,true);assert.equal(ctx.createRecoverySnapshot('p',changed).unchanged,true);assert.equal(db.projects[0].recoverySnapshots.length,1);assert.equal(db.projects[0].recoverySnapshots[0].day,'2026-09-24');assert.equal(db.projects[0].revisions[0].id,'named')});
 
-test('POV depth hides farther geometry and picking selects only the visible section',()=>{let image;const canvas={width:0,height:0,getBoundingClientRect:()=>({left:0,top:0,width:640,height:400}),getContext:()=>({fillRect(){},createImageData:(w,h)=>({data:new Uint8ClampedArray(w*h*4)}),putImageData:v=>{image=v}})};const ctx=vm.createContext({Math,Number,Float32Array,Int32Array,Infinity,POV_IMAGE_DEFAULTS:{ambient:.72,shadows:.28,exposure:1.18,contrast:1.06,warmth:0},state:{rooms:[],viewerCamera:{x:0,y:0,yaw:0,pitch:0}},povFaces:null,$:()=>canvas,render3D:()=>{ctx.povFaces.push({pts:[{x:30,y:-20,z:20},{x:30,y:20,z:20},{x:30,y:20,z:90},{x:30,y:-20,z:90}],fill:'#ff0000',attrs:{'data-section':'behind'}})},povWallFaces:()=>{ctx.povFaces.push({pts:[{x:15,y:-20,z:20},{x:15,y:20,z:20},{x:15,y:20,z:90},{x:15,y:-20,z:90}],fill:'#00ff00',attrs:{'data-section':'front','data-component':'drawer'}})},CAMERA_EYE:64});vm.runInContext(['povRasterSize','povFaceColor','renderPOV','povPickAt'].map(n=>source(closet,n)).join('\n'),ctx);ctx.renderPOV();const at=(200*640+320)*4;assert.ok(image.data[at+1]>image.data[at]*3);assert.equal(ctx.povPickAt(320,200).id,'front');assert.equal(ctx.povPickAt(320,200,true).id,'drawer');assert.equal(ctx.povPickAt(-1,200),null)});
-test('active POV click toggles visible physical drawers and ignores occluded fronts',()=>{const drawer={id:'d',type:'drawer',open:false},state={selected:null},calls=[];let pick={kind:'component',id:'d'};const ctx=vm.createContext({state,povPickAt:()=>pick,component:()=>({component:drawer,section:{id:'s'},run:{id:'r'}}),door:()=>null,commit:(label,fn)=>{calls.push(label);fn()},toggleDrawer:()=>{drawer.open=!drawer.open},select:(kind,id)=>calls.push(`${kind}:${id}`)});vm.runInContext(source(closet,'handlePOVClick'),ctx);assert.equal(ctx.handlePOVClick(20,30),true);assert.equal(drawer.open,true);assert.equal(state.selected.id,'s');assert.equal(ctx.handlePOVClick(20,30),true);assert.equal(drawer.open,false);pick=null;assert.equal(ctx.handlePOVClick(20,30),false);assert.deepEqual(calls,['Opened drawer','Closed drawer']);assert.match(closet,/povCanvas\.addEventListener\('click',e=>\{[^\n]*handlePOVClick\(e\.clientX,e\.clientY,e\.altKey\)/)});
-test('POV image defaults light a room with no fixtures and controls reach GPU uniforms',()=>{const defaults={ambient:.58,shadows:.45,exposure:1,contrast:1.08,warmth:.04,quality:'high',preset:'ideal'},ctx=vm.createContext({POV_IMAGE_DEFAULTS:defaults,POV_IMAGE_PRESETS:{ideal:defaults},POV_IMAGE_FIELDS:{exposure:['',.5,1.8],ambient:['',.2,1.2],shadows:['',0,1],contrast:['',.7,1.5],warmth:['',-1,1]},state:{rooms:[]},n:Number,Math});vm.runInContext([source(closet,'povImageSettings'),source(closet,'povFaceColor')].join('\n'),ctx);assert.equal(ctx.povImageSettings(null).ambient,.58);assert.equal(ctx.povImageSettings(null).preset,'ideal');assert.equal(ctx.povImageSettings(null).quality,'high');const face={fill:'#777777',pts:[{x:0,y:0,z:0},{x:1,y:0,z:0},{x:0,y:1,z:0}]};const lit=ctx.povFaceColor(face);assert.ok(lit[0]>80,`unlit fixture should be visible: ${lit}`);assert.match(closet,/id="povLightingPanel"/);assert.match(closet,/data-pov-preset="ideal"/);for(const name of ['uFill','uShadow','uExposure','uContrast','uWarmth'])assert.match(closet,new RegExp(`gl\\.uniform1f\\(povGLState\\.${({uFill:'fill',uShadow:'shadow',uExposure:'exposure',uContrast:'contrast',uWarmth:'warmth'})[name]}`));});
+test('POV depth hides farther geometry and picking selects only the visible section',()=>{let image;const canvas={width:0,height:0,getBoundingClientRect:()=>({left:0,top:0,width:640,height:400}),getContext:()=>({fillRect(){},createImageData:(w,h)=>({data:new Uint8ClampedArray(w*h*4)}),putImageData:v=>{image=v}})};const ctx=vm.createContext({Math,Number,Float32Array,Int32Array,Infinity,state:{rooms:[],viewerCamera:{x:0,y:0,yaw:0,pitch:0}},povFaces:null,$:()=>canvas,render3D:()=>{ctx.povFaces.push({pts:[{x:30,y:-20,z:20},{x:30,y:20,z:20},{x:30,y:20,z:90},{x:30,y:-20,z:90}],fill:'#ff0000',attrs:{'data-section':'behind'}})},povWallFaces:()=>{ctx.povFaces.push({pts:[{x:15,y:-20,z:20},{x:15,y:20,z:20},{x:15,y:20,z:90},{x:15,y:-20,z:90}],fill:'#00ff00',attrs:{'data-section':'front','data-component':'drawer'}})},CAMERA_EYE:64});vm.runInContext(['povRasterSize','povFaceColor','renderPOV','povPickAt'].map(n=>source(closet,n)).join('\n'),ctx);ctx.renderPOV();const at=(200*640+320)*4;assert.ok(image.data[at+1]>image.data[at]*3);assert.equal(ctx.povPickAt(320,200).id,'front');assert.equal(ctx.povPickAt(320,200,true).id,'drawer');assert.equal(ctx.povPickAt(-1,200),null)});
 test('POV backing dimensions follow display aspect without an unbounded pixel count',()=>{const ctx=vm.createContext({Math,Number});vm.runInContext(source(closet,'povRasterSize'),ctx);const wide=ctx.povRasterSize({getBoundingClientRect:()=>({width:1000,height:500})}),tall=ctx.povRasterSize({getBoundingClientRect:()=>({width:500,height:1000})});assert.ok(Math.abs(wide.width/wide.height-2)<.01);assert.ok(Math.abs(tall.width/tall.height-.5)<.01);assert.ok(wide.width*wide.height<=950000)});
-test('Ideal quality supersamples a standard-DPR viewport within its pixel cap',()=>{const ctx=vm.createContext({Math,Number,window:{devicePixelRatio:1},povImage:{quality:'high'}});vm.runInContext(source(closet,'povRasterSize'),ctx);const size=ctx.povRasterSize({getBoundingClientRect:()=>({width:800,height:600})});assert.ok(size.width>800);assert.ok(size.height>600);assert.ok(size.width*size.height<=1800000)});
-test('Ideal preset slider values land exactly on their control steps',()=>{const declarations=closet.match(/const POV_IMAGE_PRESETS=[^\n]+\nconst POV_IMAGE_DEFAULTS=[^\n]+\nconst POV_IMAGE_FIELDS=[^\n]+/)[0],values=vm.runInNewContext(`${declarations};({preset:POV_IMAGE_PRESETS.ideal,fields:POV_IMAGE_FIELDS})`);for(const[key,[,min,,step]]of Object.entries(values.fields))assert.ok(Math.abs((values.preset[key]-min)/step-Math.round((values.preset[key]-min)/step))<1e-9,`${key} snaps to a different value`)});
 test('flat floor and ceiling triangulate an L-shaped room without filling its cutout',()=>{const ctx=vm.createContext({Math});vm.runInContext(source(closet,'roomSurfaceTriangles'),ctx);const points=[{x:0,y:0},{x:10,y:0},{x:10,y:4},{x:4,y:4},{x:4,y:10},{x:0,y:10}],triangles=ctx.roomSurfaceTriangles(points),area=triangles.reduce((sum,[a,b,c])=>sum+Math.abs((b.x-a.x)*(c.y-a.y)-(b.y-a.y)*(c.x-a.x))/2,0);assert.equal(area,64)});
 
 function fitHarness(){const run={id:'run1',wallId:'wall1',offset:0,thickness:.75,fillerStart:0,fillerEnd:0,sections:[{id:'a',width:24,locked:true},{id:'b',width:24,locked:false}],partitions:[]};const old={id:'wall1',length:50.25,walls:[]},current={id:'wall1',length:62.25};const state={doc:{runs:[run]},rooms:[{walls:[current]}],dirty:false};const ctx=vm.createContext({state,Map,Math,Number,clone:structuredClone,n:(v,d=0)=>Number.isFinite(Number(v))?Number(v):d,wall:id=>id==='wall1'?current:null,runInterval:r=>[r.offset,r.offset+r.sections.reduce((sum,s)=>sum+s.width,0)+(r.sections.length+1)*r.thickness+(r.fillerStart||0)+(r.fillerEnd||0)],rebuildPartitions:r=>{r.partitions=Array(r.sections.length+1).fill({})},validateRun:r=>r.sections.some(s=>s.width<6||s.width>40)?['Invalid section width']:[]});vm.runInContext(source(closet,'fitRunsToRoom'),ctx);return{ctx,state,old,current,run}}
@@ -65,69 +58,4 @@ test('POV trackpad zoom changes perspective scale and clamps to a safe range',()
   assert.equal(state.viewerCamera.zoom,.65);
   assert.equal(renders,3);
   assert.equal(persisted,3);
-});
-
-test('POV rendering uses a perspective GPU scene with a still capture path',()=>{
-  assert.match(closet,/getContext\('webgl2'/);
-  assert.match(closet,/DEPTH_TEST/);
-  assert.match(closet,/uProjection/);
-  assert.match(closet,/function povCameraFrame\(/);
-  assert.match(closet,/function capturePOVStill\(/);
-  assert.match(closet,/povUpdateHit\(faces,cam,canvas\)/);
-});
-
-test('POV WebGL outlines physical faces with depth tested edges',()=>{
-  const render=source(closet,'povWebGLRender');
-  assert.match(render,/!face\.attrs\?\.\['data-surface'\]/);
-  assert.match(render,/edgePositions\.push\(q\.x,q\.y,q\.z\)/);
-  assert.match(render,/gl\.enable\(gl\.POLYGON_OFFSET_FILL\);gl\.polygonOffset\(1,1\);gl\.drawArrays\(gl\.TRIANGLES/);
-  assert.match(render,/gl\.disable\(gl\.POLYGON_OFFSET_FILL\);if\(edgePositions\.length\)/);
-  assert.match(render,/gl\.drawArrays\(gl\.LINES,0,edgePositions\.length\/3\)/);
-});
-
-test('single POV drawer click targets a visible drawer without Alt',()=>{
-  let listener,opened=false;
-  const drawer={id:'drawer-1',type:'drawer',open:false};
-  const canvas={dataset:{},addEventListener:(type,fn)=>{if(type==='click')listener=fn}};
-  const ctx=vm.createContext({document:{readyState:'complete'},window:{document:{getElementById:()=>canvas},state:{view:'pov'},povPickAt:()=>({kind:'component',id:'drawer-1'}),component:()=>({component:drawer,section:{id:'section-1'},run:{id:'run-1'}}),commit:(label,fn)=>{opened=label==='Opened drawer';fn()},toggleDrawer:()=>{drawer.open=!drawer.open}}});
-  vm.runInContext(gpuPov,ctx);
-  listener({clientX:10,clientY:10,preventDefault(){},stopImmediatePropagation(){}});
-  assert.equal(opened,true);
-  assert.equal(drawer.open,true);
-  assert.match(gpuPov,/window\.document\.getElementById\('povCanvas'\)/);
-  assert.match(gpuPov,/window\.state\?\.view/);
-  assert.match(gpuPov,/povPickAt\?\.\(event\.clientX,event\.clientY,true\)/);
-  assert.match(gpuPov,/window\.component\?\.\(picked\.id\)/);
-  assert.match(gpuPov,/found\.component\.type!=='drawer'/);
-  assert.match(gpuPov,/window\.toggleDrawer\?\.\(found\.component\.id\)/);
-  assert.match(gpuPov,/stopImmediatePropagation\(\)/);
-});
-
-test('opening a drawer extends the physical front and exposes its box geometry',()=>{
-  const ctx=vm.createContext({sectionDepth:()=>14});
-  vm.runInContext(source(closet,'drawerPresentation'),ctx);
-  const closed=ctx.drawerPresentation({}, {}, {open:false}),opened=ctx.drawerPresentation({}, {}, {open:true});
-  assert.equal(closed.open,false);assert.equal(closed.showBox,false);assert.equal(closed.extension,0);
-  assert.equal(opened.open,true);assert.equal(opened.showBox,true);assert.equal(opened.extension,14*.8);
-  assert.match(closet,/if\(presentation\.showBox\)drawerBox3\(c,x\+\(s\.width-box\.width\)\/2,depth-box\.depth\+ext/);
-  assert.match(closet,/frontGeometry\(r,s,comp\)/);
-  assert.match(closet,/box3\(c,x\+fg\.xOffset,depth\+ext\+\.05/);
-});
-
-test('POV loader cache-busts the renderer with the published build query',()=>{
-  assert.match(loader,/new URLSearchParams\(location\.search\)/);
-  assert.match(loader,/pov-webgl\.js\$\{build/);
-});
-
-test('right-click UI safety layer is merged without changing feature behavior',()=>{
-  assert.match(closet,/id="uiLayoutBtn"/);
-  assert.match(closet,/UI_SAFETY_KEY='soClosetBuilderUiSafetyV1'/);
-  assert.match(closet,/document\.addEventListener\('contextmenu'/);
-  for(const label of ['Move \/ Reorder','Pin','Hide','Reset Position','Report Problem','Explain This Control','Run Feature Test','Compare to Baseline','Copy Feature ID'])assert.match(closet,new RegExp(label));
-  assert.match(closet,/Restore Default Toolbar/);
-  assert.match(closet,/Restore Default Properties/);
-  assert.match(closet,/uiSafety\.prefs\.hidden/);
-  assert.match(closet,/uiSafety\.prefs\.order/);
-  assert.match(closet,/uiSafety\.prefs\.pinned/);
-  assert.match(closet,/data-ui-feature/);
 });

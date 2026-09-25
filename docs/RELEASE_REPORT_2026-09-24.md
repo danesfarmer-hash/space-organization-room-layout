@@ -88,3 +88,7 @@ The follow-up makes Ideal the initial and reset preset (100% brightness, 58% amb
 ## POV edge visibility follow-up — 2026-09-25
 
 The active WebGL pass rendered filled faces but skipped the outline pass that the software fallback and SVG view used. Physical face edges now draw in a dark, depth-tested line pass after the filled geometry; floor and ceiling surface triangulation remains unoutlined. The Ideal shadow and warmth slider steps now represent their preset values exactly. `npm test`: 40/40 PASS; `git diff --check`: PASS. Live visual and drawer-click smoke checks are tracked separately from these automated checks.
+
+## Restore to the pre-7:15 PM release — 2026-09-24 Chicago
+
+The last published commit before 7:15 PM CDT was `b2dfd9d` at 6:42:39 PM. At the start of restoration, `main` was `712bf74` (10:18 PM). The active `index.html` and the two changed test files were restored from `b2dfd9d`; newer commits remain in Git history. Historical rulebook and release notes remain for traceability. The active app blob matches `b2dfd9d:index.html` exactly (`f769e87e99c35e16b6ba5f661ebffbe5d6e6c322`). `npm test`: 24/24 PASS; `git diff --check`: PASS. Browser interactions and user project reload were not exercised in this rollback. Publication status is recorded in the final commit/deployment report.
