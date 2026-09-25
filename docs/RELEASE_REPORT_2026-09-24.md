@@ -70,3 +70,11 @@ Desktop axis wall, label, vertex, undo, handoff, and reload interactions passed.
 - Verification: embedded Closet script syntax check PASS; `npm test` — 3/3 suites PASS; `git diff --check` PASS.
 - Revert Feature remains visibly disabled because no safe feature-level rollback exists; full UI restore remains available through the always-visible UI Layout control.
 - Publishing: GitHub Contents API remains blocked with HTTP 403; this merge is verified locally but not published to the live site.
+
+## POV lighting and drawer regression — local candidate 2026-09-25
+
+At baseline `main` `83ea52c`, the active embedded POV click handler selected only a section. The separate `pov-webgl.js` drawer bridge was not loaded by `index.html`, which explains why drawers stopped opening. Local commit `7b35a36` puts the action in the active embedded handler. The same candidate adds a fixture-independent ambient/key light in the GPU shader and software fallback, plus POV Properties controls for brightness, ambient light, shadows, contrast, warmth, presets, reset, and render quality. Preferences use a separate local key and do not change closet geometry.
+
+`npm test`: 37/37 PASS. The embedded script parses, and `git diff --check` passes. Exact candidate `index.html` SHA-256: `9e8a3cea9085f6589bd7733e6624e067f88788386e4e2c57c8c3466c5a1ec8e2`. No browser image, click, or reload check was available for this candidate. The ten gates and limits are recorded in `docs/RELEASE_CHECKLIST.md`.
+
+Publication was rejected by automatic approval review because it would push the public repository's `main` branch without specific publication approval. The local commit is ready; the live GitHub Pages site still reflects the prior published build. Do not treat the candidate as released.

@@ -57,3 +57,11 @@ Mirror either fixture across the room centerline and transform both wall tangent
 ## Rule maintenance
 
 Add a stable ID for each new durable requirement. Change status to superseded with its successor ID when displaced; never silently delete the old rule. Keep assumptions and unresolved decisions visible. A behavior change requires a change contract, independent expected fixture values, a targeted test, and a release report. Do not edit this rulebook solely to make a failing test pass without resolving the underlying conflict.
+
+## POV image and interaction (2026-09-25)
+
+| ID | Scope | Priority / status | Exact requirement | Verification |
+| --- | --- | --- | --- | --- |
+| V-01 | POV | P1 confirmed | A closet remains clearly lit and readable in POV without placed light fixtures. Fixture lights may contribute, but are not a prerequisite for usable rendering. | Empty-fixture room in POV, light and dark Tafisa, both view directions. |
+| V-02 | POV Properties | P1 confirmed | POV Properties offers live brightness, ambient light, shadows, contrast, warmth, and render quality controls with a bright default and reset. These are view preferences and must not alter project geometry. | Adjust, switch view, reload, compare saved project state. |
+| V-03 | POV fronts | P1 confirmed | A short click on a visible drawer front toggles the physical drawer toward the room; a hidden front cannot be clicked through opaque geometry. A drag still moves the camera; Alt-click inspects an item. | Click/drag/Alt-click in a disposable drawer fixture, then save/reload. |

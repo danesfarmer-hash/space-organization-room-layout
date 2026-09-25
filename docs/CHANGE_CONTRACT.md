@@ -138,3 +138,20 @@ Verification was updated in `docs/RELEASE_REPORT_2026-09-24.md` after browser pu
 | Solid intersections | OBB-based 3D validation reports unintended volume intersections and tolerates boundary contact. | Construction fixture with injected shelf/drawer collision | PASS |
 | Revalidation | Commit, undo, redo, save, and load refresh geometry validation. | Embedded source checks and regression suite | PASS |
 | Regression | Existing run placement, corners, section sizing, bank, POV, and persistence tests remain passing. | `npm test` | PASS |
+
+## POV lighting and drawer regression (2026-09-25)
+
+- Request: keep the POV well lit without placed fixtures; add image controls to Properties; restore drawer opening on direct POV clicks.
+- Active source: `danesfarmer-hash/space-organization-room-layout`, `main` at `83ea52c5926de3494f8335112a70cc73cc8d002a`; Pages entry is `index.html`, which embeds the active Closet Builder. The standalone builder is historical and is not changed.
+- Affected: embedded Closet Builder lighting shader/software fallback, POV Properties, direct click handler; targeted tests, rulebook, release records.
+- Preserve: project model, front travel, camera navigation, depth-based occlusion, unrelated controls, room module, saved records. POV image settings use a separate device-local preference key.
+- Governing rules: G-01–G-05, C-04/C-05/C-13, P-02/P-03, V-01–V-03. No material geometry choice is unresolved.
+- Fixture: empty-fixture 120 × 96 in room with a 24 in drawer section. A visible front click opens/closes the same drawer, while a front hidden behind opaque geometry cannot be selected. Compare default and controls for white and dark material. Reload preference without changing project data.
+- Deployment target: GitHub Pages from `main`; user requested an app update, with prior publishing authorization in the session.
+
+| Criterion | Exact action and expected effect | Verification | Result |
+| --- | --- | --- | --- |
+| AC-1 | No ceiling fixtures still gives legible cabinet faces in POV on GPU and fallback renderer. | Shader/fallback fixture and browser image | NOT TESTED: fallback brightness fixture passes; GPU image not viewed |
+| AC-2 | POV Properties adjusts brightness, ambient light, shadows, contrast, warmth, and quality live; defaults and reset work after reload. | DOM/browser and preference readback | NOT TESTED: controls and binding in active payload; browser/reload not run |
+| AC-3 | Single visible drawer click opens and closes actual front and box; occluded face cannot be clicked; camera drag stays separate. | Integrated click fixture and browser smoke | NOT TESTED: active handler and depth fixtures pass; browser smoke not run |
+| AC-4 | No project geometry changes; other views, navigation, and saved projects remain stable. | Diff, `npm test`, browser workflow | NOT TESTED: diff and 37/37 tests pass; browser workflow not run |
