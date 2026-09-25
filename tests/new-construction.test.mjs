@@ -80,10 +80,12 @@ test('property cards can move by heading and restore their order without editing
   const card=name=>{const listeners={};const head={dataset:{},querySelector:selector=>selector==='.card-head strong'?{textContent:name}:null,addEventListener:(event,handler)=>listeners[event]=handler,removeEventListener:(event)=>delete listeners[event],setPointerCapture:()=>{}};return{head,listeners,classList:{add(){},remove(){}},querySelector:selector=>selector==='.card-head strong'?{textContent:name}:head,getBoundingClientRect:()=>({top:100,height:20})}};
   const a=card('Section 2'),b=card('Construction'),c=card('Add Components'),cards=[a,b,c];
   const body={querySelectorAll:()=>cards.slice(),append(item){cards.splice(cards.indexOf(item),1);cards.push(item)},insertBefore(item,target){cards.splice(cards.indexOf(item),1);const index=target?cards.indexOf(target):cards.length;cards.splice(index,0,item)}};
-  const ctx=vm.createContext({state:{selected:{kind:'section'}},localStorage:store,PROP_ORDER_KEY:'order:',document:{elementFromPoint:()=>({closest:()=>a})},$:()=>body});
+  const documentListeners={};
+  const document={elementFromPoint:()=>({closest:()=>a}),addEventListener:(event,handler)=>documentListeners[event]=handler,removeEventListener:event=>delete documentListeners[event]};
+  const ctx=vm.createContext({state:{selected:{kind:'section'}},localStorage:store,PROP_ORDER_KEY:'order:',document,$:()=>body});
   vm.runInContext([source('propertyCardKey'),source('setupPropertyCards')].join('\n'),ctx);
   ctx.setupPropertyCards();b.listeners.pointerdown({button:0,preventDefault(){},pointerId:1,target:{closest:()=>null}});
-  b.listeners.pointermove({clientX:10,clientY:100});b.listeners.pointerup({});
+  documentListeners.pointermove({clientX:10,clientY:100});documentListeners.pointerup({});
   assert.deepEqual(cards.map(x=>x.head.querySelector('.card-head strong').textContent),['Construction','Section 2','Add Components']);
   cards.splice(0,3,a,b,c);ctx.setupPropertyCards();assert.equal(cards[0],b);assert.equal(saved.get('order:section'),'["Construction","Section","Add Components"]');
 });

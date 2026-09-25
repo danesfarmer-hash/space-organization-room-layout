@@ -218,3 +218,7 @@ Verification was updated in `docs/RELEASE_REPORT_2026-09-24.md` after browser pu
 | Rename toolbar label, preserve icon/action | PASS: label function harness | NOT TESTED: live rename and persistence |
 | Drag Properties cards | PASS: pointer-order function harness | NOT TESTED: live mouse/touch drag and reload |
 | Replay every part | PASS: 20-shelf sequence fixture with no index cap and unchanged model | NOT TESTED: live replay/pause for a full closet |
+
+### Publication follow-up
+
+The user subsequently authorized publication unless a critical error was found. Live verification found two issues: the owning side of a perpendicular filler was offered as an End Panel target, and a Properties card drag left the card highlighted without changing order. The first was corrected and checked on Pages at `e7356902142332f86e6eead6922757c6b0f31914`: only the two open ends remain. The second correction moves pointer tracking and release handling to the document so the drag can finish even after the pointer leaves its starting heading. Preserve the existing card order key and all property editors; verify the final drag on Pages before reporting PASS.

@@ -179,3 +179,10 @@ Focused criteria: default no-fixture fallback luminance PASS in test; GPU shader
 
 - Initial main publication `d372d21d843fd596f1d7e42160594aa685beee97` passed the 43 automated tests and served the new toolbar, but live Plan revealed an invalid End Panel marker on the owning side of a perpendicular filler. Its terminating run stops at the owner front and therefore is not found by the shared-wall-corner search. This is a **FAIL** for end-panel eligibility in the initial publication.
 - Corrective candidate excludes owner ends referenced by another run's corner connection and flags any already-present panel at that junction as invalid. Added a regression fixture. Publish the corrective commit and verify the marker disappears before closing the check.
+
+### Live follow-up — 2026-09-25 UTC
+
+- `main` `e7356902142332f86e6eead6922757c6b0f31914` served the corrected active payload in cloud Chrome at 1363 × 937. The two-wall filler fixture now exposed exactly two open-end markers; the owner start at the connected filler was absent. An end panel added to the owner end as its own tree item, and deletion restored both original section widths (29 3/4 in). No closet revision was saved.
+- Tools accepted a typed `New Run` label while retaining the Add Run SVG and click action; Reset labels restored `Add Run`. Build Reveal displayed 37 pieces over 13 seconds, advanced through partitions and shelves, paused, and replay reset to partition step zero. Full completion and every visual part were not watched through to the end.
+- **FAIL:** dragging the Properties `Closet Run` heading toward `Tafisa Finish` left the source card highlighted and did not reorder the DOM. The pointer handler was revised to track movement and release at the document level. The revised build requires a new Pages drag check before that criterion can be marked PASS.
+- Remaining geometry image checks for KB/toe and shoe shelf, cross-view dimensions, 3D collision survey, and save/reload are NOT TESTED in this live follow-up. The automated suite passes 43/43 after the pointer fix; it does not establish those visual gates.
