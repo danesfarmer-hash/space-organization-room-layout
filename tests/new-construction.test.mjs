@@ -8,6 +8,16 @@ const closet=Buffer.from(entry.match(/const CLOSET_B64="([A-Za-z0-9+/=]+)";/)?.[
 function source(name){const start=closet.indexOf(`function ${name}(`);assert.ok(start>=0,name);const end=closet.indexOf('\nfunction ',start+1);return closet.slice(start,end<0?undefined:end)}
 const near=(a,b)=>assert.ok(Math.abs(a-b)<1e-6,`${a} differs from ${b}`);
 
+test('3D projects an off-origin room into view while preserving near-origin framing',()=>{
+  let room={x:360,y:260,w:80,h:80};
+  const ctx=vm.createContext({state:{camera:{yaw:0,pitch:0},zoom:1},bounds:()=>room,Math});
+  vm.runInContext(source('iso'),ctx);
+  near(ctx.iso({x:400,y:300,z:0}).x,500);
+  near(ctx.iso({x:400,y:300,z:0}).y,480);
+  room={x:-20,y:-20,w:120,h:100};
+  near(ctx.iso({x:40,y:30,z:0}).x,668);
+});
+
 test('KB bottom meets the 64 mm toe kick at a boundary, including normalized old shelves',()=>{
   const MM=1/25.4,DEFAULTS={toeKick:64*MM,shelf:.75};let id=0;
   const ctx=vm.createContext({MM,DEFAULTS,uid:()=>`part-${++id}`,n:(x,d=0)=>Number.isFinite(Number(x))?Number(x):d,system32:{snapDown:x=>x-0.25}});
