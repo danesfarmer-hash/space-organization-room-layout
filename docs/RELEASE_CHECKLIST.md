@@ -145,3 +145,8 @@ Focused criteria: default no-fixture fallback luminance PASS in test; GPU shader
 - Live smoke: Materials window opened; Roulette displayed a preview without a save; Cancel was used. The centered `POV Test Closet` rendered room walls and closet faces. No customer design was saved during the smoke check.
 - Observed failures/limits: the expanded toolbar labels overlapped at 1363 px; a small CSS follow-up arranges groups in a single scrollable flow. The off-origin `QA Fixture / Filler Visual Check / Two Wall Test` showed a blank POV, a known existing fixture issue; reproduction: open that closet and select POV. This is a FAIL for complete off-origin POV visual acceptance, not a verified material or dog-path pass. Material finish realism and most ten-feature interactions remain NOT TESTED.
 - Follow-up verification: `npm test` 34/34 PASS, embedded script syntax PASS, `git diff --check` PASS before the toolbar correction. Record the correction commit and live viewport result separately after publication.
+
+### Mixed wall-normal POV camera correction
+
+- In the deployed two-wall QA fixture, Plan omitted the camera marker and POV displayed only the background. The camera boundary predicate was signed (`side < radius`), which rejects every interior point when a wall's local normal points outward. The boundary test now uses perpendicular distance to the wall in camera, styling, and front-clearance placement; run footprint tests retain their own oriented normals.
+- A reversed-normal camera fixture passes, along with the full 35/35 test suite, embedded syntax check, and diff check. The deployed two-wall camera/POV must be visually rechecked before this failure can be marked resolved.
