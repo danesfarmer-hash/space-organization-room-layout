@@ -138,3 +138,10 @@ Focused criteria: default no-fixture fallback luminance PASS in test; GPU shader
 | 8. Layout Shuffle | NOT TESTED | VM generates three distinct valid variants and restores draft. Preview all three in rectangular and irregular rooms with different runs, then apply one. |
 | 9. Murphy & Sunny | NOT TESTED | Placement bounds fixture passes; run both dogs for several minutes around an obstacle/prop, inspect independent paths, pauses and removal. |
 | 10. Build Reveal | NOT TESTED | VM checks stage filtering leaves doc intact. Play, pause, replay in 3D; compare saved design before/after. |
+
+## Deployment follow-up — 2026-09-24 Chicago evening
+
+- The user subsequently authorized deployment. `main` was fast-forwarded to `495dc8c7404b0d0ba44c31510d512e3d40ee3d21` and the Pages URL showed the new toolbar and Materials window in cloud Chrome at 1363 × 937.
+- Live smoke: Materials window opened; Roulette displayed a preview without a save; Cancel was used. The centered `POV Test Closet` rendered room walls and closet faces. No customer design was saved during the smoke check.
+- Observed failures/limits: the expanded toolbar labels overlapped at 1363 px; a small CSS follow-up arranges groups in a single scrollable flow. The off-origin `QA Fixture / Filler Visual Check / Two Wall Test` showed a blank POV, a known existing fixture issue; reproduction: open that closet and select POV. This is a FAIL for complete off-origin POV visual acceptance, not a verified material or dog-path pass. Material finish realism and most ten-feature interactions remain NOT TESTED.
+- Follow-up verification: `npm test` 34/34 PASS, embedded script syntax PASS, `git diff --check` PASS before the toolbar correction. Record the correction commit and live viewport result separately after publication.
