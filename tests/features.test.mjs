@@ -71,14 +71,16 @@ test('visual props and dog positions stay clear of runs, walls and obstacles',()
   assert.equal(ctx.visualPositionFits({x:70,y:40},8,'rug'),true);
 });
 
-test('build reveal filters parts by assembly stage and leaves the model untouched',()=>{
-  const doc={runs:[{id:'run'}]},ctx=vm.createContext({Math,reveal:{active:true,paused:false,elapsed:0,duration:8000},state:{doc},revealCounts:[0,0,0,0]});
+test('build reveal places every part in order without skipping later pieces',()=>{
+  const doc={runs:[{id:'run'}]},ctx=vm.createContext({Math,reveal:{active:true,paused:false,elapsed:0,duration:0,interval:350,totals:[1,20,1,1]},state:{doc},revealCounts:[0,0,0,0]});
   run(ctx,['revealStage','revealAllows']);
   assert.equal(ctx.revealAllows({'data-occluder':'partition'}),true);
   assert.equal(ctx.revealAllows({'data-occluder':'drawer-front'}),false);
-  ctx.reveal.elapsed=4000;vm.runInContext('revealCounts.fill(0)',ctx);assert.equal(ctx.revealAllows({'data-occluder':'drawer-front'}),true);
+  ctx.reveal.elapsed=18*350;vm.runInContext('revealCounts.fill(0)',ctx);
+  for(let i=0;i<20;i++)assert.equal(ctx.revealAllows({'data-occluder':'shelf'}),i<=17,`piece ${i+1}`);
+  ctx.reveal.elapsed=21*350;vm.runInContext('revealCounts.fill(0)',ctx);assert.equal(ctx.revealAllows({'data-occluder':'drawer-front'}),true);
   assert.equal(ctx.revealAllows({'data-occluder':'door-front'}),false);
-  ctx.reveal.elapsed=6000;vm.runInContext('revealCounts.fill(0)',ctx);assert.equal(ctx.revealAllows({'data-occluder':'door-front'}),true);
+  ctx.reveal.elapsed=22*350;vm.runInContext('revealCounts.fill(0)',ctx);assert.equal(ctx.revealAllows({'data-occluder':'door-front'}),true);
   assert.deepEqual(doc,{runs:[{id:'run'}]});
 });
 

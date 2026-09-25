@@ -155,3 +155,22 @@ Focused criteria: default no-fixture fallback luminance PASS in test; GPU shader
 
 - The reversed-normal correction reached Pages but the two-wall fixture still had no Plan camera marker. DOM geometry showed a valid 77 × 62 in closed rectangle and clear central floor. The recovery algorithm reused an invalid saved camera as the search origin even when it was far outside the room, while the search radius was bounded by the room span.
 - Invalid cameras outside the room now begin recovery from its center; valid cameras and colliding cameras already inside retain their position/search behavior. A 1000,1000 stale-camera fixture recovers into a 100 × 80 room with its zoom preserved. `npm test` 36/36 PASS; live two-wall POV requires a new deployed check.
+
+## Toe/shoe/end-panel/toolbar/Properties/reveal local candidate — 2026-09-24 Chicago
+
+- Baseline: `main` `3d929fcd1d864494ebfc36500c1d3988e25266a6`; work branch `work/toe-shoe-endpanel-properties`; active owner `index.html` embedded Closet Builder. No deployment or publication. Exact candidate commit/hash recorded when committed.
+- Automated verification: `npm test` 43/43 PASS, embedded script syntax PASS. Browser/viewport: NOT TESTED; this unpublished local candidate was not opened in a browser. No project data changed. The automated tests establish geometric coordinates and UI-handler logic, not physical appearance or full pointer interaction.
+- Release decision: NOT RELEASED by user instruction. Browser criteria below remain unverified.
+
+| # | Gate | Result | Evidence and limit |
+| --- | --- | --- | --- |
+| 1 | App preservation | PASS | Room payload and standalone modules unchanged; only embedded Closet Builder, focused tests, and docs edited. Browser UI comparison not run. |
+| 2 | Geometry invariants | NOT TESTED | KB, shoe wedge and end-panel coordinates pass focused fixtures; full 3D intersection survey not run. |
+| 3 | Section dimensions | NOT TESTED | End-panel outside span and section widths pass fixture; cross-view visual readback not run. |
+| 4 | Shared partitions | PASS | Same partition IDs before/after adding/removing both panels; existing N+1 fixture passes. |
+| 5 | Clearances | NOT TESTED | Ineligible filler and neighboring ends rejected in fixture; visual fit against all room conditions not run. |
+| 6 | Corner ownership | NOT TESTED | Existing mirrored fixtures pass; no new live ownership workflow. |
+| 7 | Filler placement | NOT TESTED | Existing three-filler source fixtures pass and end-panel corner rejection tested; rendered seam not inspected. |
+| 8 | 3D boundaries and visibility | NOT TESTED | Wedge and panel vertices pass unit fixtures; two-side occlusion/browser inspection absent. |
+| 9 | Drawer bank behavior | NOT TESTED | Existing 32 mm bank fixtures pass; live drawer workflow not run. |
+| 10 | Save and sync | NOT TESTED | Model snapshot and device-local preferences implemented; browser save/reload/reopen/module switch not run. |

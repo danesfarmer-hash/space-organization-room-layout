@@ -74,3 +74,12 @@ Add a stable ID for each new durable requirement. Change status to superseded wi
 | --- | --- | --- | --- | --- |
 | V-04 | Closet Builder UI | P1 confirmed | The toolbar opens separate draggable, resizable, closeable Lighting and Tools windows. Lighting owns POV image preferences; this supersedes V-02's Properties location while retaining Ideal as default. Tools lists callable existing actions and can hide/recover their toolbar shortcuts. Essential access to Select, Lighting, and Tools remains visible. | Window interaction, live POV, hide/recover, reload. |
 | C-14 | Fillers | P1 confirmed | A corner filler renders KT and KB horizontal components and a corresponding toe kick. No full-height face panel is generated, including in mirrored corners or elevation. Each generated piece carries an inspectable identity. Deletion of shared structural dependencies requires a separate valid model edit. | Three corner fixture volumes and both views. |
+
+## Construction and workspace refinement (2026-09-24 Chicago, local candidate)
+
+| ID | Scope | Priority / status | Exact requirement | Verification |
+| --- | --- | --- | --- | --- |
+| C-15 | KB and shoe shelves | P1 confirmed | KB bottom is exactly 64 mm above the floor and contacts the toe kick at its top boundary without shared volume. Each shoe board has its back 64 mm above its front; retaining lip is at the front. | Physical vertices and rendered front/3D/POV. |
+| C-16 | End panels | P1 confirmed | A separate selectable/deletable toolbar end-panel part attaches only to eligible open ends, not filler corners. It retains its own identity, the run's height/thickness/adjacent finish, back flush to section back and front 1 in beyond the partition front. The original partition remains. Fit preferred openings first and put remainder in an uneven shelf section; restore run width when removed. | Both ends, mirrored fillers, partition IDs, measured bounds, undo/save/reload. |
+| V-05 | Closet Builder workspace | P1 confirmed | The Elevation view is labeled Front View. Tools permits renaming each toolbar label without replacing icon/action. Property cards may be dragged to rearrange the Properties panel. | UI, reload, action continuity. |
+| V-06 | Build Reveal | P1 confirmed | Replay shows every measured construction part in sequence, without grouping late parts into a skipped step, and does not alter the design. | More than 17 parts, pause/replay, geometry snapshot. |

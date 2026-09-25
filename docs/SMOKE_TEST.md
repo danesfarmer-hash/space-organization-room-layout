@@ -16,3 +16,10 @@ Use a disposable browser profile or record fixture; do not overwrite a customer'
 2. Check actual 12/16/24 in return depths, both terminating endpoints, both visible fillers, no overlapping shelves/partitions, and usable center clearance in plan and two 3D angles.
 3. Edit one wall length and one section width. Switch Room Layout ↔ Closet Builder without a separate manual save, then save/reload/reopen. Record which values persist and which change downstream.
 4. Repeat affected controls at a 390 × 844 touch-sized viewport and a 1440 × 900 desktop viewport. Verify selection, drag, zoom, menu access, and readable geometry. Record any browser automation limitation explicitly.
+
+## Local toe/shoe/end-panel/replay candidate (not yet run in browser)
+
+1. In a disposable 120 × 96 in closet, build an open run with hanging, shelves, and shoe shelves. Inspect KB/toe seam at 64 mm in Front View and both 3D directions; inspect shoe boards in POV from the side and confirm the back is 64 mm above the front, the lip is at the room-facing front, and there is no geometry overlap.
+2. Activate End Panel, click an open start and end marker in Plan. Confirm each panel is a separate selectable part, outside its existing partition, with back flush and front 1 in beyond the partition front. Compare dimensions and finish. Delete first one, Undo, then delete both in reverse order; verify exact original run width and partitions. Try filler corners, perpendicular connected corners, adjacent runs, and wall-to-wall eligible ends. Save/reload and repeat selection/removal.
+3. Switch Front View and confirm the label in the view dock, title, and any door guidance. In Tools, rename a toolbar label, use the tool, reload, reset its label, and check the icon remains the same. Drag two Properties cards by headings, edit a field afterward, reload and check card order.
+4. Add a closet with over 20 visible construction pieces. Play Reveal, pause, then Replay. Count placement steps through the last shelf/drawer/door; no batch should appear at once after the earlier parts. Compare saved design before/after.

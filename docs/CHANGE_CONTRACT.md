@@ -200,3 +200,21 @@ Verification was updated in `docs/RELEASE_REPORT_2026-09-24.md` after browser pu
 - Baseline: `main` at `fe2c09d206be575f22093f2493de493c84036e6f`; active source is embedded `CLOSET_B64` in `index.html`. Preserve `ROOM_B64`, standalone historical files, saved customer projects, restored Ideal lighting, and filler KT/KB/toe geometry.
 - User expressly prohibits publish/deploy. Work is a local candidate only. Existing revisions are project records; review must preserve a working draft. Surface materials and styling are Closet Builder visual metadata, independent of Room Layout structure and closet construction. Previews and animations must leave measured geometry unchanged until an explicit apply action.
 - Acceptance: the ten numbered checks in the user prompt. Record actual PASS/FAIL/NOT TESTED separately; 3D/POV visual checks are not inferred from source or geometry tests. Test a centered and an off-origin room because the prior cloud-browser two-run fixture was blank in 3D/POV.
+
+## Toe kick, shoe shelf, end panel, toolbar, Properties, and reveal — local candidate (2026-09-24 Chicago)
+
+- Starting source: `main` `3d929fcd1d864494ebfc36500c1d3988e25266a6`; active entry `index.html` embeds `CLOSET_B64`. Work branch: `work/toe-shoe-endpanel-properties`. The embedded Room Layout and standalone historical modules remain unchanged. No publication or deployment is authorized.
+- Scope: exact KB/toe contact, shoe-board rise/lip, separate end-panel object and width restoration, Front View text, tool label preferences, Properties card order preferences, complete piece-by-piece replay. Preserve room shell, project data, legacy section parts, shared partitions, camera and front-opening behavior.
+- Governing rules: G-01–G-05, C-05/C-06/C-07/C-14, P-02/P-03, and new C-15/C-16/V-05/V-06. The panel is outside the existing end partition, with its back at the section back and front 1 in beyond the partition front. Panel thickness comes from the run; finish comes from the adjacent section. The run's outside span stays fixed by adjusting unlocked section widths. Preferred widths are selected first; an unlocked shelf section absorbs the remainder. If there is no valid fit, the action is rejected. Removing the last panel restores the saved pre-panel widths.
+- An end with a filler, connected perpendicular run, same-wall neighboring run, or legacy finished-end part is ineligible. While a separate panel exists, section count changes are rejected so the restoration snapshot cannot silently detach from section identities. Existing section editing retains its run outside span.
+- Browser data: no customer project edited. Tool names and card order use device-local keys; they do not change the saved closet model. Replay renders each measured construction primitive at 350 ms intervals and recomputes its full manifest before restart.
+
+| Acceptance criterion | Automated evidence | Browser observation |
+| --- | --- | --- |
+| KB bottom at 64 mm and toe top at 64 mm | PASS: new KB normalization and boundary fixture; filler fixture | NOT TESTED: front/3D visual seam |
+| Shoe shelf rear 64 mm above front; front lip | PASS: actual wedge vertices and front lip render-path fixture | NOT TESTED: POV/3D visual and clearance |
+| Separate end panel on eligible ends, shared partitions intact, width restored | PASS: add both ends, reverse removal, end eligibility and 3D geometry fixture | NOT TESTED: pointer snap, selection, delete, undo, reload, finish appearance |
+| Front View wording | PASS: active payload text assertion | NOT TESTED: interface view switch |
+| Rename toolbar label, preserve icon/action | PASS: label function harness | NOT TESTED: live rename and persistence |
+| Drag Properties cards | PASS: pointer-order function harness | NOT TESTED: live mouse/touch drag and reload |
+| Replay every part | PASS: 20-shelf sequence fixture with no index cap and unchanged model | NOT TESTED: live replay/pause for a full closet |
