@@ -174,3 +174,8 @@ Focused criteria: default no-fixture fallback luminance PASS in test; GPU shader
 | 8 | 3D boundaries and visibility | NOT TESTED | Wedge and panel vertices pass unit fixtures; two-side occlusion/browser inspection absent. |
 | 9 | Drawer bank behavior | NOT TESTED | Existing 32 mm bank fixtures pass; live drawer workflow not run. |
 | 10 | Save and sync | NOT TESTED | Model snapshot and device-local preferences implemented; browser save/reload/reopen/module switch not run. |
+
+### Live publication follow-up — 2026-09-24 Chicago
+
+- Initial main publication `d372d21d843fd596f1d7e42160594aa685beee97` passed the 43 automated tests and served the new toolbar, but live Plan revealed an invalid End Panel marker on the owning side of a perpendicular filler. Its terminating run stops at the owner front and therefore is not found by the shared-wall-corner search. This is a **FAIL** for end-panel eligibility in the initial publication.
+- Corrective candidate excludes owner ends referenced by another run's corner connection and flags any already-present panel at that junction as invalid. Added a regression fixture. Publish the corrective commit and verify the marker disappears before closing the check.

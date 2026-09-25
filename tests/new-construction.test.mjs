@@ -57,6 +57,8 @@ test('end panel snapping rejects both filler corners and occupied ends',()=>{
   r.sections[0].endPanelLeft=true;assert.equal(ctx.endPanelEligible(r,'start'),false);r.sections[0].endPanelLeft=false;
   state.doc.runs.push({id:'neighbor',wallId:'wall',offset:r.offset+ctx.runWidth(r),sections:[{width:10}],thickness:.75});
   assert.equal(ctx.endPanelEligible(r,'end'),false);
+  state.doc.runs.pop();state.doc.runs.push({id:'return',wallId:'other',cornerStart:{ownerRunId:r.id,ownerSide:'start'}});
+  assert.equal(ctx.endPanelEligible(r,'start'),false,'owner side of a filler corner is not an open end');
 });
 
 test('Front View wording and label controls are present in the active build',()=>{
