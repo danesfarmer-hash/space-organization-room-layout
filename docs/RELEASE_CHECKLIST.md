@@ -47,3 +47,22 @@ Required gates: `npm test` passes; every affected criterion has an observed resu
 | 10 | Save and sync | NOT TESTED | Existing data fixtures pass; browser save/reopen/module switch not run. |
 
 Focused criteria: default no-fixture fallback luminance PASS in test; GPU shader uniform wiring PASS by source assertions, live visual NOT TESTED. Direct visible drawer click opens and closes through the active embedded handler PASS in an integration harness, live pointer interaction NOT TESTED. Occluded hit suppression PASS in a depth fixture. POV Properties controls and reset are present in the active payload; live interaction, preference reload, and GPU appearance NOT TESTED.
+
+## Ideal POV preset follow-up candidate — 2026-09-25
+
+- Starting published commit: `b26145dff6a55bc508bcae1736897825e0d1d808`; Pages and Rules checks succeeded. Browser: cloud Chrome at 1363 × 937, existing `Walkthrough Client / POV Walkthrough Job / POV Test Closet` fixture. No project data saved during visual review.
+- Initial browser result: POV controls present and responsive; initial Bright studio image visually washed out on white surfaces. This prompted the Ideal default refinement.
+- Local candidate verification: `npm test` 38/38 PASS, embedded script parses, diff check PASS. Live Ideal visual, preference reload, and drawer click remain to be checked after publication.
+
+| # | Gate | Result | Evidence and limit |
+| --- | --- | --- | --- |
+| 1 | App preservation | PASS | Only active embedded Closet POV image UI/settings and targeted tests/docs changed. |
+| 2 | Geometry invariants | NOT TESTED | No geometry change; existing model fixtures pass. |
+| 3 | Section dimensions | NOT TESTED | No section edit. |
+| 4 | Shared partitions | PASS | Existing partition fixture passes. |
+| 5 | Clearances | NOT TESTED | No clearance edit. |
+| 6 | Corner ownership | NOT TESTED | Existing model fixtures pass; live ownership flip not run. |
+| 7 | Filler placement | NOT TESTED | Existing filler fixture passes; visual seam not checked. |
+| 8 | 3D boundaries and visibility | NOT TESTED | Depth fixture passes; live two-direction Ideal image review pending. |
+| 9 | Drawer bank behavior | NOT TESTED | Existing drawer model/click fixtures pass; live drawer interaction pending. |
+| 10 | Save and sync | NOT TESTED | Existing fixtures pass; project save/reopen not run. POV preference uses a separate local key. |

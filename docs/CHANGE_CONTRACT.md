@@ -155,3 +155,11 @@ Verification was updated in `docs/RELEASE_REPORT_2026-09-24.md` after browser pu
 | AC-2 | POV Properties adjusts brightness, ambient light, shadows, contrast, warmth, and quality live; defaults and reset work after reload. | DOM/browser and preference readback | NOT TESTED: controls and binding in active payload; browser/reload not run |
 | AC-3 | Single visible drawer click opens and closes actual front and box; occluded face cannot be clicked; camera drag stays separate. | Integrated click fixture and browser smoke | NOT TESTED: active handler and depth fixtures pass; browser smoke not run |
 | AC-4 | No project geometry changes; other views, navigation, and saved projects remain stable. | Diff, `npm test`, browser workflow | NOT TESTED: diff and 37/37 tests pass; browser workflow not run |
+
+## Ideal POV default refinement (2026-09-25)
+
+- Starting published commit: `b26145dff6a55bc508bcae1736897825e0d1d808` on `main`; Rules checks and Pages deployment succeeded. In a 1363 × 937 Chrome cloud browser, the walkthrough fixture showed the controls, but white surfaces were visually washed out at the initial Bright studio values.
+- Scope: make Ideal the named initial/reset preset; use balanced exposure, ambient fill, shadow depth, contrast, warmth, and high image quality. Keep Bright, Soft, and Dramatic as alternatives. Sliders and quality switch to Custom. High quality must visibly supersample at device pixel ratio 1 within a bounded pixel cap.
+- Preserve: project geometry, local project records, POV drawer action, camera, existing explicit image preferences, unrelated UI.
+- Rules: G-01–G-05, V-01–V-03; no geometry change.
+- Acceptance: new preference state displays Ideal selected with 100% brightness, 58% ambient, 45% shadows, 108% contrast, slight warmth, and High quality; Reset restores it; changing a control marks Custom; high quality exceeds native resolution on a 1× display without exceeding 1.8 million pixels; no-fixture closet remains legible. Browser visual review of the published revision is required before a full visual PASS claim.

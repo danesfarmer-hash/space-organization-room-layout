@@ -78,3 +78,9 @@ At baseline `main` `83ea52c`, the active embedded POV click handler selected onl
 `npm test`: 37/37 PASS. The embedded script parses, and `git diff --check` passes. Exact candidate `index.html` SHA-256: `9e8a3cea9085f6589bd7733e6624e067f88788386e4e2c57c8c3466c5a1ec8e2`. No browser image, click, or reload check was available for this candidate. The ten gates and limits are recorded in `docs/RELEASE_CHECKLIST.md`.
 
 Publication was rejected by automatic approval review because it would push the public repository's `main` branch without specific publication approval. The local commit is ready; the live GitHub Pages site still reflects the prior published build. Do not treat the candidate as released.
+
+## Published POV controls and Ideal default refinement — 2026-09-25
+
+The previously blocked local candidate was published through the connected repository write path after the user explicitly authorized `push`. `main` commit `b26145dff6a55bc508bcae1736897825e0d1d808` passed the Rules checks run #36089095535 and Pages run #36089095226. Live browser inspection confirmed the POV Properties sliders and presets, but the initial Bright studio image was washed out in the existing small walkthrough fixture; live drawer clicking was not yet exercised.
+
+The follow-up candidate makes Ideal the initial and reset preset (100% brightness, 58% ambient, 45% shadows, 108% contrast, slight warmth, High quality), leaves the older choices available, and makes High quality supersample even at device pixel ratio 1. `npm test`: 38/38 PASS. Browser appearance and preference reload for this refinement remain pending until its Pages deployment completes. No saved project geometry was changed.
