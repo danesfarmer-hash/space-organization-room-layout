@@ -104,3 +104,37 @@ Focused criteria: default no-fixture fallback luminance PASS in test; GPU shader
 | 8 | 3D boundaries and visibility | NOT TESTED | POV depth/picking fixture passes; browser image inspection unavailable. |
 | 9 | Drawer bank | NOT TESTED | Existing 32 mm fixtures pass; live interaction unavailable. |
 | 10 | Save and sync | NOT TESTED | Existing data fixture passes; reload and module switch unavailable. |
+
+## Local Closet Builder feature candidate — 2026-09-25
+
+- Scope: user REWR ten-feature request and the already authorized toolbar/part-selection context. `docs/CHANGE_CONTRACT.md` records the contract. No publication or deployment was requested or performed.
+- Recoverable baseline: `main` at `fe2c09d206be575f22093f2493de493c84036e6f`; baseline `index.html` SHA-256 `0067f3e645777a986fed5c99e228bbdaed4de68c4193a75e794bcb088b11f4c4`. Candidate is uncommitted; active `index.html` SHA-256 `9add77c69a14bc90bc4c045e5453a76cfc376b779a2e4e00ac61ccdd73da53`. Embedded `ROOM_B64` is byte-identical to baseline.
+- Verification: `node --check` on the decoded active Closet Builder script PASS; `npm test` 34/34 PASS; `git diff --check` PASS. Eight focused model tests exercise revisions, front timing/clearance, material preview, layout candidates, visual prop collision, reveal stage order, mood color, and independent dog motion. These tests do not establish rendered appearance or a full interaction path.
+- Browser/OS/viewport: NOT TESTED. Cloud Chrome refused the unpublished local `file:` preview under its URL policy. No alternate browser route was attempted. No project data was changed in a browser. Persistence after reload, responsive windows, visual material quality, dog paths, and 3D geometry still require a local desktop/mobile run.
+- Release decision: BLOCKED for verification. The user expressly said not to publish or deploy.
+
+| # | Gate | Result | Evidence and limit |
+| --- | --- | --- | --- |
+| 1 | App preservation | PASS | `ROOM_B64` unchanged; active Closet Builder is the sole app payload edited. Git baseline is recoverable. UI comparison remains untested. |
+| 2 | Geometry invariants | NOT TESTED | Model tests pass; no complete rendered collision survey. |
+| 3 | Section dimensions | NOT TESTED | No cross-view visual comparison. |
+| 4 | Shared partitions | PASS | Existing geometry fixture verifies N+1 shared partitions. |
+| 5 | Clearances | NOT TESTED | Focused ray clearance test passes; live door/drawer sweep and utilities not inspected. |
+| 6 | Corner ownership | NOT TESTED | Mirrored numeric fixtures pass; live ownership flip not performed. |
+| 7 | Filler placement | NOT TESTED | Existing 12/16/24-inch fixtures pass; 3D/front visual seam not inspected. |
+| 8 | 3D boundaries and visibility | NOT TESTED | POV depth fixture passes; no browser image or two-sided visual. |
+| 9 | Drawer bank behavior | NOT TESTED | System 32 fixtures pass; live opening/closing and bank edit not exercised. |
+| 10 | Save and sync | NOT TESTED | Revision snapshot and model save fixtures pass; browser reload/reopen/module switch not exercised. |
+
+| Acceptance check | Result | Evidence / next reproduction |
+| --- | --- | --- |
+| 1. Versions | NOT TESTED | VM saves two distinct IDs and snapshots, reviews/restores. In UI create two revisions, reload, review each, and confirm timestamps/active badge. |
+| 2. POV zoom | NOT TESTED | Clamp fixture reaches `.32`; in POV zoom to minimum in a closed room, rotate and walk at boundaries. |
+| 3. Front animation | NOT TESTED | VM confirms easing at 0/500/1000 ms and clearance cap. Click drawer/door twice in 3D and POV; time and inspect sweep near obstacles. |
+| 4. Materials window and realism | NOT TESTED | IDs and material code checked; open/resize/close/reopen window, apply separate wall/floor finishes, inspect POV texture and scale under lighting. |
+| 5. Roulette | NOT TESTED | VM confirms preview leaves design and saved materials unchanged. Shuffle twice in UI, cancel and keep, then reload. |
+| 6. Mood | NOT TESTED | Code separates viewer mood from doc. Switch each preset in POV and compare geometry/materials before and after. |
+| 7. Dress-Up | NOT TESTED | VM verifies placement avoids runs/walls/props. Add, move, remove, clear each prop in UI; compare measured design. |
+| 8. Layout Shuffle | NOT TESTED | VM generates three distinct valid variants and restores draft. Preview all three in rectangular and irregular rooms with different runs, then apply one. |
+| 9. Murphy & Sunny | NOT TESTED | Placement bounds fixture passes; run both dogs for several minutes around an obstacle/prop, inspect independent paths, pauses and removal. |
+| 10. Build Reveal | NOT TESTED | VM checks stage filtering leaves doc intact. Play, pause, replay in 3D; compare saved design before/after. |

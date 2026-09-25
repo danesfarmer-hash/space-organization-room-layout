@@ -45,6 +45,7 @@ function harness() {
     readDB: () => structuredClone(db),
     writeDB: value => { db = structuredClone(value); },
     projectIssues: () => [], toast: () => {}, render: () => {},
+    visualProps: () => [], visualDogs: () => ({}), dogNames: [], dogActors: new Map(),
     document: {createElementNS: (_ns, tag) => {
       const el = {tag, attributes: {}, setAttribute(k, v) {this.attributes[k] = String(v);}};
       elements.push(el);
