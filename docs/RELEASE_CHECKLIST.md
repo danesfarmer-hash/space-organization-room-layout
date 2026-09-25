@@ -150,3 +150,8 @@ Focused criteria: default no-fixture fallback luminance PASS in test; GPU shader
 
 - In the deployed two-wall QA fixture, Plan omitted the camera marker and POV displayed only the background. The camera boundary predicate was signed (`side < radius`), which rejects every interior point when a wall's local normal points outward. The boundary test now uses perpendicular distance to the wall in camera, styling, and front-clearance placement; run footprint tests retain their own oriented normals.
 - A reversed-normal camera fixture passes, along with the full 35/35 test suite, embedded syntax check, and diff check. The deployed two-wall camera/POV must be visually rechecked before this failure can be marked resolved.
+
+### Camera recovery follow-up
+
+- The reversed-normal correction reached Pages but the two-wall fixture still had no Plan camera marker. DOM geometry showed a valid 77 × 62 in closed rectangle and clear central floor. The recovery algorithm reused an invalid saved camera as the search origin even when it was far outside the room, while the search radius was bounded by the room span.
+- Invalid cameras outside the room now begin recovery from its center; valid cameras and colliding cameras already inside retain their position/search behavior. A 1000,1000 stale-camera fixture recovers into a 100 × 80 room with its zoom preserved. `npm test` 36/36 PASS; live two-wall POV requires a new deployed check.
