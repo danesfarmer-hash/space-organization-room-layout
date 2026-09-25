@@ -84,3 +84,23 @@ Focused criteria: default no-fixture fallback luminance PASS in test; GPU shader
 | 8 | 3D boundaries and visibility | NOT TESTED | Baseline depth fixture passes; two-direction visual inspection not performed. |
 | 9 | Drawer bank | NOT TESTED | Baseline bank fixtures pass; no live mini-drawer workflow. |
 | 10 | Save and sync | NOT TESTED | Baseline persistence fixtures pass; no customer or disposable project reload. |
+
+## Toolbar and filler local candidate — 2026-09-24 Chicago
+
+- Baseline: `main` `45c456827c1a1ccc78a581aed2ab16d94945a993`, restored 6:42 PM entry. `index.html` is the active embedded entry. The user subsequently authorized pushing this candidate; record the resulting commit and Pages status separately.
+- `npm test`: 26/26 PASS. Embedded Closet Builder script syntax and `git diff --check`: PASS. The embedded Room Layout payload is byte identical to baseline. Ideal POV sampled face color remains `[174,155,130]`, identical to the restored renderer.
+- Browser/viewport and project reload: NOT TESTED. A local Playwright browser was unavailable; the attempted browser install failed. No customer project was edited. The 12/16/24-inch corner generator fixtures each produce exactly KB, KT, and toe kick without an 84-inch face box. This does not substitute for a visual inspection.
+- Verification decision: automated checks PASS; affected browser visual and interactive checks remain NOT TESTED. A push is authorized, but do not claim a visually verified release.
+
+| # | Gate | Result | Evidence and limit |
+| --- | --- | --- | --- |
+| 1 | App preservation | PASS | Room payload unchanged; active Closet payload, targeted tests, and docs changed locally. No saved project changed. |
+| 2 | Geometry invariants | NOT TESTED | Three filler bounds fixtures pass; full 3D intersection survey not run. |
+| 3 | Section dimensions | NOT TESTED | Existing numeric tests pass; cross-view dimension comparison unavailable. |
+| 4 | Shared partitions | PASS | Existing 1/2/3 section fixture passes. |
+| 5 | Clearances | NOT TESTED | Existing fixtures pass; full wall/door/utility clearance inspection unavailable. |
+| 6 | Corner ownership | NOT TESTED | Mirrored numeric tests pass; live ownership flip unavailable. |
+| 7 | Filler placement | NOT TESTED | 12/16/24 generator produces only three short parts; visual seam and both view directions unavailable. |
+| 8 | 3D boundaries and visibility | NOT TESTED | POV depth/picking fixture passes; browser image inspection unavailable. |
+| 9 | Drawer bank | NOT TESTED | Existing 32 mm fixtures pass; live interaction unavailable. |
+| 10 | Save and sync | NOT TESTED | Existing data fixture passes; reload and module switch unavailable. |

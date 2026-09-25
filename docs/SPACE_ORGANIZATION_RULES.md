@@ -67,3 +67,10 @@ Add a stable ID for each new durable requirement. Change status to superseded wi
 | V-03 | POV fronts | P1 confirmed | A short click on a visible drawer front toggles the physical drawer toward the room; a hidden front cannot be clicked through opaque geometry. A drag still moves the camera; Alt-click inspects an item. | Click/drag/Alt-click in a disposable drawer fixture, then save/reload. |
 
 **V-02 clarification (2026-09-25):** The default POV image mode and Reset action use the named Ideal preset. A manually adjusted slider becomes Custom; selecting another preset or Ideal restores its complete saved image settings. High quality supersamples at standard display density, with a bounded pixel budget. Existing user-edited image preferences stay device-local.
+
+## Toolbar and filler clarification (2026-09-24, local draft)
+
+| ID | Scope | Priority / status | Exact requirement | Verification |
+| --- | --- | --- | --- | --- |
+| V-04 | Closet Builder UI | P1 confirmed | The toolbar opens separate draggable, resizable, closeable Lighting and Tools windows. Lighting owns POV image preferences; this supersedes V-02's Properties location while retaining Ideal as default. Tools lists callable existing actions and can hide/recover their toolbar shortcuts. Essential access to Select, Lighting, and Tools remains visible. | Window interaction, live POV, hide/recover, reload. |
+| C-14 | Fillers | P1 confirmed | A corner filler renders KT and KB horizontal components and a corresponding toe kick. No full-height face panel is generated, including in mirrored corners or elevation. Each generated piece carries an inspectable identity. Deletion of shared structural dependencies requires a separate valid model edit. | Three corner fixture volumes and both views. |

@@ -176,3 +176,20 @@ Verification was updated in `docs/RELEASE_REPORT_2026-09-24.md` after browser pu
 | Newer app code is absent; historical later commits remain recoverable | Inspect source diff and history | PASS locally |
 | Baseline automated regression suite passes | `npm test` | PASS locally: 24/24 |
 | GitHub Pages serves the restored app | Push and confirm deployment | PENDING |
+
+## Local Closet Builder toolbar, part selection, and filler correction (2026-09-24)
+
+- Request: move POV image controls to a draggable, resizable, closeable Lighting window opened from the toolbar; add a separate Tools window to run tools and show/hide their toolbar buttons; click and delete individual editable closet items; remove the repeatedly generated full-height filler face.
+- Active repository / branch / commit / entry: `danesfarmer-hash/space-organization-room-layout`, local checkout of `main` at `45c456827c1a1ccc78a581aed2ab16d94945a993`; GitHub Pages entry `index.html` embeds `CLOSET_B64`. Work is local only. The standalone `closet-builder.html` is not the active build owner.
+- Affected: embedded Closet Builder payload in `index.html`, targeted geometry/POV tests, this contract and rulebook. Preserve Room Layout payload, saved projects, icon graphics, camera controls, drawer/door opening behavior, and existing construction geometry beyond the filler pieces.
+- Rules: G-01–G-05, C-01–C-13, V-01/V-03. Latest instruction moves V-02 from Properties to Lighting. New C-14 and V-04 below. Shared structural partitions remain run-owned; the Parts mode targets items with editable model identity, not a free deletion of shared partition geometry.
+- Baseline evidence: three generated corners (bottom owner depth 16, mirrored left owner depth 12, bottom owner depth 24) each produced KB, KT, and an 84-inch tall, 3/4-inch deep `data-filler-face` box. This is a renderer path defect, not an inference from an image.
+- Deployment: user authorized a push after reviewing the local candidate on 2026-09-24 Chicago. Browser visual and reload checks remain unverified and must be reported as such.
+
+| Criterion | Expected observable effect | Verification | Result |
+| --- | --- | --- | --- |
+| AC-1 | Lighting and Tools open independently as draggable, resizable, closeable windows; presets/controls change POV image without altering geometry. | Syntax, browser interaction, reload | NOT TESTED: script parses and Ideal matches the restored face color; live windows, resize, appearance, and reload were not exercised. |
+| AC-2 | Hiding a shortcut leaves the tool callable from Tools; Show all and Reset recover hidden buttons; selection and Tools remain accessible. | Browser interaction, reload | NOT TESTED: catalog and persistence paths are present; live hide/recover and reload unavailable. |
+| AC-3 | Parts mode selects visible component, door, accessory, or optional section panel; Delete removes selected editable item with Undo; ordinary front interaction remains when Parts mode is off. | Browser interaction and model fixture | NOT TESTED: depth-hit fixture passes Parts mode selection; live click, deletion, Undo, and reload unavailable. |
+| AC-4 | Mirrored 12/16/24-inch corner cases generate exactly KT, KB, toe kick; no full-height filler face in 3D or elevation; volumes do not overlap. | Three generator fixtures, rendered view inspection | NOT TESTED: all three generator fixtures pass and elevation source has three short pieces; live two-view visual inspection unavailable. |
+| AC-5 | Existing geometry, POV depth/picking, and room handoff tests pass. | `npm test` | PASS: 26/26. `node --check` and `git diff --check` pass. |

@@ -23,16 +23,21 @@ const names = [
   'sectionDepth', 'rebuildPartitions', 'runTouchesWallCorner',
   'sharedRunCorners', 'preferredWidthPlan', 'attachCorner',
   'resolveCornerAccessFillers', 'preferredWidthPenalty', 'avoidElectrical',
-  'planPoint', 'svg', 'renderPlanOverlays', 'saveToProject'
+  'planPoint', 'svg', 'renderPlanOverlays', 'fillerShelfLevels',
+  'fillerBridge3', 'saveToProject'
 ];
 
 function harness() {
   let serial = 0;
   let db = {projects: []};
   const elements = [];
+  const boxes = [];
   const state = {rooms: [], doc: {settings: {target: 24}, runs: []}, record: null, dirty: false};
   const ctx = vm.createContext({
     state, window: {}, Date, Math, Number, String, Array, SVG: 'http://www.w3.org/2000/svg',
+    DEFAULTS: {toeKick: 64 / 25.4, toeSetback: .75, shelf: .75},
+    materialHex: () => '#ffffff', shadeHex: color => color,
+    box3: (_canvas, x, y, z, width, depth, height, _fill, attrs) => boxes.push({x, y, z, width, depth, height, attrs}),
     n: (v, fallback = 0) => Number.isFinite(Number(v)) ? Number(v) : fallback,
     round: (v, step) => Math.round(v / step) * step,
     uid: () => `test-${++serial}`,
@@ -48,7 +53,7 @@ function harness() {
   });
   vm.runInContext(`const CORNER_FILLER_MIN=10, CORNER_FILLER_MAX=13; const PREFERRED_SECTION_WIDTHS=[18,24,30,36]; ${names.map(sourceOf).join('\n')}`, ctx);
   const call = (name, ...args) => ctx[name](...args);
-  return {state, ctx, call, elements, db: () => db, setDB: value => { db = structuredClone(value); }};
+  return {state, ctx, call, elements, boxes, db: () => db, setDB: value => { db = structuredClone(value); }};
 }
 
 function corner(owner = 'bottom', ownerDepth = 16) {
@@ -108,7 +113,7 @@ test('C-01/C-02/C-03: bottom owner, left terminates at actual 16 in depth with v
   const canvas = {append: el => h.elements.push(el)};
   h.call('renderPlanOverlays', canvas);
   const filler = h.elements.find(e => e.tag === 'polygon' && e.attributes['data-filler'] === h.leftRun.id);
-  const face = h.elements.find(e => e.tag === 'line' && e.attributes['data-filler-face'] === 'true');
+  const face = h.elements.find(e => e.tag === 'line' && e.attributes['data-filler-front-edge'] === 'true');
   assert.ok(filler, 'plan filler must exist');
   assert.equal(face.attributes['data-owner-run'], h.bottomRun.id);
   near(Number(face.attributes.x1), 12, 'filler front x: terminating run depth');
@@ -124,7 +129,7 @@ test('C-01/C-02/C-03: mirrored ownership, bottom begins 12 in from corner and fi
   assert.equal(h.bottomRun.cornerStart.ownerDepth, 12);
   assert.equal(h.bottomRun.fillerStart, 12);
   h.call('renderPlanOverlays', {append: () => {}});
-  const face = h.elements.find(e => e.tag === 'line' && e.attributes['data-filler-face'] === 'true');
+  const face = h.elements.find(e => e.tag === 'line' && e.attributes['data-filler-front-edge'] === 'true');
   assert.equal(face.attributes['data-owner-run'], h.leftRun.id);
   near(Number(face.attributes.y1), 16, 'filler front y: terminating run depth');
   near(Number(face.attributes.y2), 16, 'filler front y2');
@@ -139,6 +144,24 @@ test('C-02: changing the owner return depth repositions an existing terminating 
   near(h.call('runInterval', h.leftRun)[1], 72, '96 in wall minus actual 24 in return');
   assert.equal(h.leftRun.cornerEnd.ownerDepth, 24);
   near(h.call('runInterval', h.bottomRun)[0], 0, 'owner remains at back corner');
+});
+
+test('corner fillers on three layouts contain KB, KT, and toe kick without a full face panel', () => {
+  for (const [owner, depth] of [['bottom', 16], ['left', 12], ['bottom', 24]]) {
+    const h = corner(owner, depth);
+    h.call('resolveCornerAccessFillers');
+    const r = owner === 'bottom' ? h.leftRun : h.bottomRun;
+    const side = owner === 'bottom' ? 'end' : 'start';
+    h.call('fillerBridge3', {}, r, side, 0, h.call('cornerFillerInfo', r, side));
+    assert.deepEqual(h.boxes.map(box => box.attrs['data-filler-piece']), ['KB', 'KT', 'toe-kick']);
+    assert.ok(h.boxes.every(box => box.height < 3.3), `${owner}/${depth}: no full-height filler face`);
+    const [kb, kt, toe] = h.boxes;
+    near(kb.z, 64 / 25.4, 'KB above toe kick');
+    near(kt.z, r.height - .75, 'KT at run top');
+    near(toe.height, 64 / 25.4, 'toe kick height');
+    assert.ok(toe.z + toe.height <= kb.z + .001, 'toe kick does not intersect KB');
+    assert.equal(toe.width, kb.width);
+  }
 });
 
 test('P-02/P-03: save retains custom dimensions and room state in same project record', () => {
