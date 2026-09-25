@@ -118,3 +118,10 @@ test('right-click UI safety layer is merged without changing feature behavior',(
   assert.match(closet,/uiSafety\.prefs\.pinned/);
   assert.match(closet,/data-ui-feature/);
 });
+
+test('right-click UI safety menu dismisses on outside selection and Escape',()=>{
+  assert.match(closet,/window\.uiSafetyCloseMenu=uiSafetyCloseMenu/);
+  assert.match(closet,/document\.addEventListener\('keydown',e=>\{if\(e\.key==='Escape'&&uiSafety\.menu\)/);
+  assert.match(entry,/document\.addEventListener\("pointerdown",e=>\{[\s\S]*win\.uiSafetyCloseMenu\?\.\(\)/);
+  assert.match(entry,/document\.addEventListener\("keydown",e=>\{[\s\S]*contentWindow\?\.uiSafetyCloseMenu\?\.\(\)/);
+});
