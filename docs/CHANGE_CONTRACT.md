@@ -93,3 +93,48 @@ Verification was updated in `docs/RELEASE_REPORT_2026-09-24.md` after browser pu
 | AC-1 | Two-finger drag up/down over POV zooms in/out, preserving camera position and geometry. | Zoom helper fixture and live wheel event | PENDING |
 | AC-2 | Zoom remains bounded and does not affect plan/elevation zoom state. | Clamp fixture and view switch smoke test | PENDING |
 | AC-3 | Existing POV navigation, selection, and construction tests remain passing. | `npm test` | PENDING |
+
+## POV GPU scene replacement (2026-09-24)
+
+- Request: replace the software POV projection with a real eye-level 3D scene using perspective projection and a depth buffer; preserve construction geometry, section IDs, picking, navigation, collision, persistence, and trackpad zoom.
+- Implementation: the deployed entry keeps the existing model generators, but sends their physically thick faces to a native WebGL scene with a perspective camera, GPU depth testing, directional/ceiling fill lighting, sRGB tone mapping, and a high-resolution still capture path. A 2D raster fallback remains for browsers without WebGL. CPU projection is retained only for section/item picking, not the displayed image.
+- Still mode: the POV `STILL` control temporarily raises the backing resolution and downloads a PNG without changing the saved camera or model.
+
+| AC-1 | POV uses a perspective GPU scene with depth-tested opaque faces; shelves and partitions cannot render through nearer opaque panels. | Embedded shader/depth markers, live browser POV, view comparison | PENDING |
+| AC-2 | Camera pitch/yaw, walk/strafe, collision, saved camera, section/item picking, and trackpad zoom remain compatible with the new renderer. | Existing focused tests plus live walkthrough | PENDING |
+| AC-3 | Still mode produces a higher-resolution PNG while leaving the interactive camera responsive and unchanged. | UI smoke and captured image dimensions | PENDING |
+| AC-4 | Existing construction and room-sync behavior remains passing. | `npm test`, syntax check, diff review | PENDING |
+
+## POV single-click drawer opening correction (2026-09-25)
+
+- Request: a single click on a visible drawer front in Closet Builder POV must open that drawer front and reveal the physical drawer box/interior; clicking again closes it.
+- Active repository: `danesfarmer-hash/space-organization-room-layout`, `main`; Pages entry remains `index.html` with the embedded Closet Builder payload and the external POV interaction patch.
+- Affected: `pov-webgl.js` embedded-frame click bridge and focused POV drawer tests. The prior bridge referenced iframe-local lexical helpers (`$`, `state`, and unqualified picking) from a separately injected script, so the visible click did not reliably mutate the drawer model.
+- Preserve: room-facing drawer travel, actual drawer-box geometry, depth-tested/occluded picking, section selection/editing, keyboard/trackpad POV controls, all existing project data, and unrelated UI.
+- Governing rules: G-01–G-05, C-04, C-05, C-13, C-12, P-02/P-03. Drawer fronts must bump outward, never inward; opening must move the physical box/front rather than a decorative-only state.
+- Deployment: the user explicitly requested correction and publication.
+
+| Criterion | Exact action and expected effect | Verification method | Result |
+| --- | --- | --- | --- |
+| AC-1 | One click on the nearest visible drawer front reaches the embedded model without Alt and toggles the drawer state. | Focused bridge test plus live disposable drawer fixture | PENDING |
+| AC-2 | Opening sets physical outward extension and renders the real drawer box parts; closing returns the front and box to the cabinet. | `drawerPresentation` fixture and source geometry assertion; live screenshot | PENDING |
+| AC-3 | Hidden drawers remain unclickable through opaque partitions; visible section behavior remains unchanged. | Existing depth/picking fixture and live POV click path | PENDING |
+| AC-4 | Existing construction and POV/navigation tests remain passing. | `npm test`, syntax check, diff review | PENDING |
+
+## Overlay and filler geometry contract (2026-09-24)
+
+- Request: use one physical geometry contract for drawer/door overlays and corner fillers across Closet Builder, AI Builder, plan, elevation, POV, save/load, undo, and redo. Half overlay stops 2 mm from a shared partition centerline; full overlay stops 4 mm from an outside panel edge; fillers contain only KT, KB, and their toe kick.
+- Active repository: `danesfarmer-hash/space-organization-room-layout`, `main`; `index.html` is the deployed embedded build owner.
+- Affected: embedded Closet Builder geometry helpers, elevation/POV construction solids, filler renderers, save/load and history revalidation, and geometry tests. Preserve run placement, section sizing, corner ownership, drawer/door opening behavior, and existing saved records.
+- Governing rules: G-01–G-05, C-01–C-13, especially C-05, C-06, C-09, C-11, C-12, C-13, P-02/P-03. The new overlay/filler requirements are explicit user corrections and take precedence over the prior visual-offset implementation.
+- Deployment: user requested implementation and publication after tests pass.
+
+| Criterion | Expected observable effect | Method | Result |
+| --- | --- | --- | --- |
+| Overlay formulas | Half = t/2 − 2 mm; full = t − 4 mm; no centerline crossing; 4 mm shared gap. | Pure active-build fixtures | PASS |
+| Shared front geometry | Elevation, 3D/POV, and saved dimensions use `frontGeometry` from physical panel bounds. | Source contract and render-path fixtures | PASS |
+| Drawer/door opening | Front dimensions remain fixed while drawer box/door opening geometry moves independently. | POV drawer, presentation, and geometry fixtures | PASS |
+| Filler solids | Filler emits only KT, KB, and toe kick; no full face panel. | Filler-part and renderer fixtures | PASS |
+| Solid intersections | OBB-based 3D validation reports unintended volume intersections and tolerates boundary contact. | Construction fixture with injected shelf/drawer collision | PASS |
+| Revalidation | Commit, undo, redo, save, and load refresh geometry validation. | Embedded source checks and regression suite | PASS |
+| Regression | Existing run placement, corners, section sizing, bank, POV, and persistence tests remain passing. | `npm test` | PASS |

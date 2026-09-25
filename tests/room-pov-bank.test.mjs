@@ -4,19 +4,22 @@ import {readFileSync} from 'node:fs';
 import vm from 'node:vm';
 
 const entry=readFileSync(new URL('../index.html',import.meta.url),'utf8');
+const gpuPov=readFileSync(new URL('../pov-webgl.js',import.meta.url),'utf8');
+const loader=readFileSync(new URL('../pov-loader.js',import.meta.url),'utf8');
 const closet=Buffer.from(entry.match(/const CLOSET_B64="([A-Za-z0-9+/=]+)";/)?.[1]||'','base64').toString();
 assert.ok(closet.includes('function renderPOV('));
 const suite=entry.slice(entry.indexOf('function roomContentSignature('));
 function source(text,name){const start=text.indexOf(`function ${name}(`);assert.ok(start>=0,name);const next=text.indexOf('\nfunction ',start+1);return text.slice(start,next<0?undefined:next)}
 const defaults={shelf:.75,toeKick:64/25.4,faceGap:4/25.4,drawerSideDeduction:1.0625,drawerDepthDeduction:1,drawerHeightDeduction:1.5};
 function bankHarness(){let serial=0;const ctx=vm.createContext({Math,Number,Error,DEFAULTS:defaults,PITCH32:32/25.4,n:(v,d=0)=>Number.isFinite(Number(v))?Number(v):d,round:(x,p)=>Math.round(x/p)*p,fmt:v=>v.toFixed(2),uid:()=>`c${++serial}`});
-  vm.runInContext(`const system32={nearest(v){return Math.round((v-${9.5/25.4})/PITCH32)*PITCH32+${9.5/25.4}},snapDown(v){return Math.floor((v-${9.5/25.4}+1e-7)/PITCH32)*PITCH32+${9.5/25.4}}};${['makeComponent','fixedShelf','bankShelves','stackDrawers'].map(n=>source(closet,n)).join('\n')}`,ctx);
+  vm.runInContext(`const system32={nearest(v){return Math.round((v-${9.5/25.4})/PITCH32)*PITCH32+${9.5/25.4}},snapDown(v){return Math.floor((v-${9.5/25.4}+1e-7)/PITCH32)*PITCH32+${9.5/25.4}}};${['makeComponent','fixedShelf','bankShelves','stackDrawers','alignDrawerBanks'].map(n=>source(closet,n)).join('\n')}`,ctx);
   const bottom={type:'shelf',kind:'KB',z:defaults.toeKick,thickness:.75},top={type:'shelf',kind:'KM',z:42,thickness:.75},upper={type:'shelf',kind:'adjustable',z:60,thickness:.75};
   const drawers=[0,1,2,3].map((_,i)=>({type:'drawer',variant:'standard',z:3+i*9,height:8.5}));
   return {ctx,s:{components:[bottom,...drawers,top,upper]},bottom,top,upper,drawers};
 }
-test('mini drawer recalculates the bank on mounting rows and moves only upper shelves',()=>{const h=bankHarness(),r={height:84};h.ctx.stackDrawers(r,h.s);const prior=h.top.z;const mini={type:'drawer',variant:'mini',height:3,z:prior};h.s.components.push(mini);h.ctx.stackDrawers(r,h.s);assert.ok(h.top.z>prior);assert.ok(h.upper.z>h.top.z+.75);assert.ok(h.drawers[0].z>=h.bottom.z+.75+defaults.faceGap-1e-3);for(const d of [...h.drawers,mini]){const row=(d.mountZ-9.5/25.4)/(32/25.4);assert.ok(Math.abs(row-Math.round(row))<1e-3);assert.ok(d.z+d.height<h.top.z)}assert.equal(h.s.components.filter(c=>c.kind==='KB').length,1)});
-test('bank rejects a mini drawer that cannot fit without overlapping the top shelf',()=>{const h=bankHarness();h.ctx.stackDrawers({height:58},h.s);h.s.components.push({type:'drawer',variant:'mini',height:3,z:45});assert.throws(()=>h.ctx.stackDrawers({height:44},h.s),/Drawer bank needs/)});
+test('mini drawer recalculates the bank with exact 4 mm visible gaps and moves only upper shelves',()=>{const h=bankHarness(),r={height:84};h.ctx.stackDrawers(r,h.s);const prior=h.top.z;const mini={type:'drawer',variant:'mini',height:3,z:prior};h.s.components.push(mini);h.ctx.stackDrawers(r,h.s);assert.ok(h.top.z>prior);assert.ok(h.upper.z>h.top.z+.75);assert.ok(h.drawers[0].z>=h.bottom.z+.75+defaults.faceGap-1e-3);const all=[...h.s.components.filter(c=>c.type==='drawer')].sort((a,b)=>a.z-b.z);for(let i=1;i<all.length;i++){assert.ok(Math.abs(all[i].z-(all[i-1].z+all[i-1].height+defaults.faceGap))<1e-4);assert.ok(all[i-1].z+all[i-1].height<h.top.z)}assert.ok(Math.abs(h.top.z-(all.at(-1).z+all.at(-1).height+defaults.faceGap))<1e-4);assert.equal(h.s.components.filter(c=>c.kind==='KB').length,1)});
+test('bank rejects a mini drawer that cannot fit without overlapping the top shelf',()=>{const h=bankHarness();h.ctx.stackDrawers({height:58},h.s);h.s.components.push({type:'drawer',variant:'mini',height:3,z:45});assert.throws(()=>h.ctx.stackDrawers({height:44},h.s),/no usable space|Drawer bank needs/)});
+test('four adjacent drawer banks align rows and retain 4 mm reveals',()=>{const base=bankHarness(),sections=Array.from({length:4},(_,bank)=>({id:`bank-${bank}`,width:24,components:[{type:'shelf',kind:'KB',z:defaults.toeKick,thickness:.75},{type:'drawer',height:8.5,z:3},{type:'drawer',height:8.5,z:12},{type:'drawer',height:8.5,z:21},{type:'drawer',height:8.5,z:30},{type:'shelf',kind:'KM',z:42,thickness:.75}]})),r={height:84,sections};sections.forEach(s=>base.ctx.stackDrawers(r,s));base.ctx.alignDrawerBanks(r);const rows=sections.map(s=>s.components.filter(c=>c.type==='drawer').sort((a,b)=>a.z-b.z));for(let i=0;i<4;i++){assert.ok(rows.every(list=>Math.abs(list[i].z-rows[0][i].z)<1e-4));if(i)assert.ok(Math.abs(rows[0][i].z-(rows[0][i-1].z+rows[0][i-1].height+defaults.faceGap))<1e-4)}const kms=sections.map(s=>s.components.find(c=>c.kind==='KM'));assert.ok(kms.every(k=>Math.abs(k.z-kms[0].z)<1e-4));assert.ok(Math.abs(kms[0].z-(rows[0].at(-1).z+rows[0].at(-1).height+defaults.faceGap))<1e-4)});
 test('adding a drawer to an open section creates one top bank boundary',()=>{const h=bankHarness();h.s.components=h.s.components.filter(c=>c!==h.top);h.ctx.stackDrawers({height:84},h.s);assert.equal(h.s.components.filter(c=>c.kind==='KM').length,1);assert.ok(h.s.components.find(c=>c.kind==='KM').z>h.drawers.at(-1).z+h.drawers.at(-1).height)});
 
 function cameraHarness(){const state={rooms:[],doc:{runs:[]},viewerCamera:null,record:null};const ctx=vm.createContext({state,Math,Number,Error,CAMERA_RADIUS:3,CAMERA_EYE:64,n:(v,d=0)=>Number.isFinite(Number(v))?Number(v):d,pointInPoly:(p,poly)=>p.x>0&&p.x<100&&p.y>0&&p.y<80,wall:id=>state.rooms[0].walls.find(w=>w.id===id),runWidth:r=>r.width,sectionDepth:(r,s)=>s.depth,renderCanvas:()=>{},persistViewerCamera:()=>{},toast:()=>{}});vm.runInContext(['obstacleBasis','cameraFits','setViewerCamera','moveViewer'].map(n=>source(closet,n)).join('\n'),ctx);const points=[{x:0,y:0},{x:100,y:0},{x:100,y:80},{x:0,y:80}],walls=points.map((a,i)=>{const b=points[(i+1)%4],dx=b.x-a.x,dy=b.y-a.y,L=Math.hypot(dx,dy);return{id:`w${i}`,a,b,length:L,ux:dx/L,uy:dy/L,nx:-dy/L,ny:dx/L,roomKey:'main'}});state.rooms=[{key:'main',closed:true,points,walls,obstacles:[]}];return{ctx,state}}
@@ -58,4 +61,60 @@ test('POV trackpad zoom changes perspective scale and clamps to a safe range',()
   assert.equal(state.viewerCamera.zoom,.65);
   assert.equal(renders,3);
   assert.equal(persisted,3);
+});
+
+test('POV rendering uses a perspective GPU scene with a still capture path',()=>{
+  assert.match(closet,/getContext\('webgl2'/);
+  assert.match(closet,/DEPTH_TEST/);
+  assert.match(closet,/uProjection/);
+  assert.match(closet,/function povCameraFrame\(/);
+  assert.match(closet,/function capturePOVStill\(/);
+  assert.match(closet,/povUpdateHit\(faces,cam,canvas\)/);
+});
+
+test('single POV drawer click targets a visible drawer without Alt',()=>{
+  let listener,opened=false;
+  const drawer={id:'drawer-1',type:'drawer',open:false};
+  const canvas={dataset:{},addEventListener:(type,fn)=>{if(type==='click')listener=fn}};
+  const ctx=vm.createContext({document:{readyState:'complete'},window:{document:{getElementById:()=>canvas},state:{view:'pov'},povPickAt:()=>({kind:'component',id:'drawer-1'}),component:()=>({component:drawer,section:{id:'section-1'},run:{id:'run-1'}}),commit:(label,fn)=>{opened=label==='Opened drawer';fn()},toggleDrawer:()=>{drawer.open=!drawer.open}}});
+  vm.runInContext(gpuPov,ctx);
+  listener({clientX:10,clientY:10,preventDefault(){},stopImmediatePropagation(){}});
+  assert.equal(opened,true);
+  assert.equal(drawer.open,true);
+  assert.match(gpuPov,/window\.document\.getElementById\('povCanvas'\)/);
+  assert.match(gpuPov,/window\.state\?\.view/);
+  assert.match(gpuPov,/povPickAt\?\.\(event\.clientX,event\.clientY,true\)/);
+  assert.match(gpuPov,/window\.component\?\.\(picked\.id\)/);
+  assert.match(gpuPov,/found\.component\.type!=='drawer'/);
+  assert.match(gpuPov,/window\.toggleDrawer\?\.\(found\.component\.id\)/);
+  assert.match(gpuPov,/stopImmediatePropagation\(\)/);
+});
+
+test('opening a drawer extends the physical front and exposes its box geometry',()=>{
+  const ctx=vm.createContext({sectionDepth:()=>14});
+  vm.runInContext(source(closet,'drawerPresentation'),ctx);
+  const closed=ctx.drawerPresentation({}, {}, {open:false}),opened=ctx.drawerPresentation({}, {}, {open:true});
+  assert.equal(closed.open,false);assert.equal(closed.showBox,false);assert.equal(closed.extension,0);
+  assert.equal(opened.open,true);assert.equal(opened.showBox,true);assert.equal(opened.extension,14*.8);
+  assert.match(closet,/if\(presentation\.showBox\)drawerBox3\(c,x\+\(s\.width-box\.width\)\/2,depth-box\.depth\+ext/);
+  assert.match(closet,/frontGeometry\(r,s,comp\)/);
+  assert.match(closet,/box3\(c,x\+fg\.xOffset,depth\+ext\+\.05/);
+});
+
+test('POV loader cache-busts the renderer with the published build query',()=>{
+  assert.match(loader,/new URLSearchParams\(location\.search\)/);
+  assert.match(loader,/pov-webgl\.js\$\{build/);
+});
+
+test('right-click UI safety layer is merged without changing feature behavior',()=>{
+  assert.match(closet,/id="uiLayoutBtn"/);
+  assert.match(closet,/UI_SAFETY_KEY='soClosetBuilderUiSafetyV1'/);
+  assert.match(closet,/document\.addEventListener\('contextmenu'/);
+  for(const label of ['Move \/ Reorder','Pin','Hide','Reset Position','Report Problem','Explain This Control','Run Feature Test','Compare to Baseline','Copy Feature ID'])assert.match(closet,new RegExp(label));
+  assert.match(closet,/Restore Default Toolbar/);
+  assert.match(closet,/Restore Default Properties/);
+  assert.match(closet,/uiSafety\.prefs\.hidden/);
+  assert.match(closet,/uiSafety\.prefs\.order/);
+  assert.match(closet,/uiSafety\.prefs\.pinned/);
+  assert.match(closet,/data-ui-feature/);
 });

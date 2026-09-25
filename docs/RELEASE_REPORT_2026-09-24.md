@@ -45,3 +45,28 @@ Unresolved specification: the app has generic drawer deductions but no selected 
 | 10 | Save and sync | PASS | After undo, Closet Builder showed 54″ wall; reload/reopen retained the 54 × 37″ room. Named-revision creation was not exercised. |
 
 Desktop axis wall, label, vertex, undo, handoff, and reload interactions passed. Double-click exact dimension editing, hosted-object hit priority, plan pan, angled-wall browser drag, and mobile touch remain NOT TESTED; numeric horizontal/angled axis fixtures passed. The deployed feature is available, with those workflow limits recorded rather than certified.
+
+## Overlay + filler geometry fix — 2026-09-25
+
+- Scope: physical half/full overlay calculations, shared geometry across elevation/POV, filler KT/KB/toe-kick composition, oriented-solid overlap validation, drawer/door separation, and mutation/save-history revalidation.
+- Local source commit: `0ee48d1` (`Fix physical overlay and filler geometry`). Local `index.html` SHA-256: `ee3c6a01dcaf7965af49c2e3441a496d42a3ca7f187450049d0ae162fc7e58a2`.
+- Local automated verification: `npm test` — 3/3 suites PASS; 0 failures. Syntax checks, `git diff --check`, exact overlay fixtures, filler composition fixtures, and solid-overlap fixtures PASS.
+- Acceptance status: all executable overlay/filler/regression checks PASS, including centered 4 mm shared-partition gaps, 4 mm full-overlay edge stops, section/thickness recalculation, drawer-box separation, filler-only KT/KB/toe-kick solids, corner ownership, and add/move/resize/delete/undo/redo/save/load validation.
+- Publishing: GitHub Contents API returned 403 (write integration unavailable). The requested GitHub Pages deployment could not be published from this session; no live-site PASS claim is made for this build.
+
+## Four drawer-bank simulation — 2026-09-25
+
+- Fixture: four adjacent integrated drawer sections, four drawers per bank, and one full-length door above each bank.
+- Geometry change: visible drawer rows no longer use 32 mm pitch as a visual offset; each front is placed from the physical preceding front plus the 4 mm reveal. The shared bank-top shelf and door base use the same 4 mm rule. Adjacent banks are row-aligned by `alignDrawerBanks`.
+- Simulation result: all four banks share the same row elevations and bank-top elevation. Drawer-row, drawer-to-bank-shelf, bank-shelf-to-door, and door-to-ceiling gaps each measured 4.00 mm (0.15748 in) within rounding tolerance.
+- Automated verification: `npm test` — 3/3 suites, 20/20 tests PASS; `git diff --check` PASS.
+- Publishing: GitHub Contents API remains blocked with HTTP 403, so this corrected build is verified locally but not published to the live site.
+
+## Right-click UI safety layer — 2026-09-25
+
+- Scope: merged `Space_Organization_Right_Click_UI_Safety_Layer.html` into the authoritative embedded Closet Builder payload as a presentation-only layer.
+- Added stable feature IDs, right-click menus, drag/reorder, pin/unpin, hide, per-control reset, report diagnostics, explain/test/compare actions, copy-ID, and a persistent UI Layout Manager.
+- UI preferences use a separate `soClosetBuilderUiSafetyV1` storage key. The safety layer does not write project geometry, System 32 values, POV geometry, run placement, or save/load data.
+- Verification: embedded Closet script syntax check PASS; `npm test` — 3/3 suites PASS; `git diff --check` PASS.
+- Revert Feature remains visibly disabled because no safe feature-level rollback exists; full UI restore remains available through the always-visible UI Layout control.
+- Publishing: GitHub Contents API remains blocked with HTTP 403; this merge is verified locally but not published to the live site.
